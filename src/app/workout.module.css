@@ -2,7 +2,7 @@
   min-height: 100vh;
   max-width: 480px;
   margin: 0 auto;
-  padding: 0 16px 100px;
+  padding: 0 16px 120px;
 }
 
 /* Header */
@@ -16,7 +16,7 @@
 }
 
 .logo {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   letter-spacing: -0.5px;
   color: var(--accent);
@@ -32,8 +32,8 @@
   flex: 1;
   background: transparent;
   color: var(--text-muted);
-  padding: 12px 0;
-  font-size: 16px;
+  padding: 14px 0;
+  font-size: 17px;
   font-weight: 500;
   border-bottom: 2px solid transparent;
   transition: color 0.15s, border-color 0.15s;
@@ -65,16 +65,16 @@
   display: inline-block;
   background: var(--accent);
   color: #fff;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  padding: 5px 12px;
+  padding: 6px 12px;
   border-radius: 4px;
 }
 
 .dateLabel {
-  font-size: 15px;
+  font-size: 17px;
   color: var(--text-muted);
 }
 
@@ -90,7 +90,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 16px;
+  padding: 18px;
   transition: border-color 0.2s;
 }
 
@@ -103,23 +103,23 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .exerciseName {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 600;
   color: var(--text);
 }
 
 .deloadWarning {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--danger);
-  margin-top: 3px;
+  margin-top: 4px;
 }
 
 .exerciseWeight {
-  font-size: 24px;
+  font-size: 30px;
   font-weight: 700;
   color: var(--accent);
   line-height: 1;
@@ -136,20 +136,20 @@
 }
 
 .weightUnit {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 500;
   color: var(--text-muted);
   margin-left: 2px;
 }
 
 .weightInput {
-  font-size: 24px;
+  font-size: 30px;
   font-weight: 700;
   color: var(--accent);
   background: transparent;
   border: none;
   border-bottom: 2px solid var(--accent);
-  width: 72px;
+  width: 90px;
   text-align: right;
   outline: none;
   padding: 0 0 2px;
@@ -165,18 +165,18 @@
 .setRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
 .setBtn {
-  width: 52px;
-  height: 52px;
+  width: 58px;
+  height: 58px;
   border-radius: 10px;
   background: var(--bg);
   border: 2px solid var(--border);
   color: var(--text-muted);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   transition: all 0.12s;
   display: flex;
@@ -202,24 +202,24 @@
 }
 
 .setCount {
-  font-size: 15px;
+  font-size: 17px;
   color: var(--text-muted);
   margin-left: 4px;
 }
 
 .setPreview {
-  font-size: 15px;
+  font-size: 17px;
   color: var(--text-muted);
 }
 
 /* Action buttons */
 .primaryBtn {
   width: 100%;
-  padding: 18px;
+  padding: 20px;
   border-radius: 12px;
   background: var(--accent);
   color: #fff;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   transition: background 0.15s, transform 0.1s;
 }
@@ -245,11 +245,11 @@
 
 .ghostBtn {
   width: 100%;
-  padding: 14px;
+  padding: 16px;
   border-radius: 12px;
   background: transparent;
   color: var(--text-muted);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
   border: 1px solid var(--border);
   transition: background 0.15s, color 0.15s;
@@ -264,14 +264,14 @@
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-top: 20px;
+  margin-top: 24px;
 }
 
 .dataBtn {
   background: transparent;
   color: var(--text-faint);
-  font-size: 12px;
-  padding: 6px 14px;
+  font-size: 14px;
+  padding: 8px 16px;
   border-radius: 6px;
   border: 1px solid var(--border);
   transition: color 0.15s, border-color 0.15s;
@@ -311,22 +311,22 @@
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 14px 16px 10px;
+  padding: 16px 16px 12px;
   max-width: 480px;
   margin: 0 auto;
 }
 
 .timerTime {
-  font-size: 32px;
+  font-size: 40px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: -1px;
-  min-width: 80px;
+  min-width: 96px;
   text-align: center;
 }
 
 .timerReadyLabel {
-  font-size: 20px;
+  font-size: 26px;
   font-weight: 700;
   color: var(--success);
   flex: 1;
@@ -337,10 +337,10 @@
   background: var(--bg);
   border: 1px solid var(--border);
   color: var(--text-muted);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
-  padding: 8px 14px;
-  border-radius: 6px;
+  padding: 10px 14px;
+  border-radius: 8px;
   transition: color 0.12s, border-color 0.12s;
 }
 
@@ -352,8 +352,8 @@
 .timerDismiss {
   background: transparent;
   color: var(--text-faint);
-  font-size: 16px;
-  padding: 6px 8px;
+  font-size: 20px;
+  padding: 8px 10px;
   border-radius: 6px;
   transition: color 0.12s;
   margin-left: auto;
@@ -364,7 +364,7 @@
 }
 
 .timerBar {
-  height: 3px;
+  height: 4px;
   background: var(--border);
   max-width: 480px;
   margin: 0 auto;
@@ -392,10 +392,10 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   color: var(--text);
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 8px;
-  font-size: 20px;
+  font-size: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -407,7 +407,7 @@
 }
 
 .calMonthLabel {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 600;
 }
 
@@ -420,10 +420,10 @@
 
 .calDayHeader {
   text-align: center;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-faint);
-  padding: 4px 0 8px;
+  padding: 4px 0 10px;
   text-transform: uppercase;
 }
 
@@ -436,7 +436,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
   transition: background 0.12s, border-color 0.12s;
   padding: 0;
 }
@@ -446,7 +446,7 @@
 }
 
 .calDayNum {
-  font-size: 15px;
+  font-size: 16px;
   color: var(--text-muted);
   line-height: 1;
 }
@@ -467,7 +467,7 @@
 }
 
 .calDotA {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   background: var(--accent);
   color: #fff;
@@ -477,7 +477,7 @@
 }
 
 .calDotB {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   background: var(--success);
   color: #fff;
@@ -490,7 +490,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 16px;
+  padding: 18px;
   margin-top: 4px;
 }
 
@@ -499,6 +499,7 @@
   text-align: center;
   padding: 60px 20px;
   color: var(--text-muted);
+  font-size: 17px;
   line-height: 1.8;
 }
 
@@ -512,7 +513,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 16px;
+  padding: 18px;
 }
 
 .historyHeader {
@@ -525,13 +526,13 @@
 .historyExercises {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .historyRow {
   display: flex;
   align-items: center;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .historyExName {
@@ -546,7 +547,7 @@
 
 .historyResult {
   font-weight: 600;
-  min-width: 32px;
+  min-width: 36px;
   text-align: right;
 }
 
