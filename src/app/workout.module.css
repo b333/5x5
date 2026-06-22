@@ -123,6 +123,16 @@
   font-weight: 700;
   color: var(--accent);
   line-height: 1;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.exerciseWeight:hover {
+  border-bottom-color: var(--accent);
 }
 
 .weightUnit {
@@ -130,6 +140,25 @@
   font-weight: 500;
   color: var(--text-muted);
   margin-left: 2px;
+}
+
+.weightInput {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--accent);
+  width: 72px;
+  text-align: right;
+  outline: none;
+  padding: 0 0 2px;
+  -moz-appearance: textfield;
+}
+
+.weightInput::-webkit-outer-spin-button,
+.weightInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
 }
 
 /* Set buttons */
@@ -231,19 +260,124 @@
   color: var(--text);
 }
 
-.resetBtn {
-  display: block;
-  margin: 20px auto 0;
+.dataRow {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.dataBtn {
   background: transparent;
   color: var(--text-faint);
   font-size: 12px;
-  padding: 6px 12px;
+  padding: 6px 14px;
   border-radius: 6px;
-  transition: color 0.15s;
+  border: 1px solid var(--border);
+  transition: color 0.15s, border-color 0.15s;
 }
 
-.resetBtn:hover {
+.dataBtn:hover {
+  color: var(--text-muted);
+  border-color: var(--text-faint);
+}
+
+.dataBtnDanger:hover {
   color: var(--danger);
+  border-color: var(--danger);
+}
+
+.fileInput {
+  display: none;
+}
+
+/* Timer */
+.timerWidget {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border-top: 2px solid var(--accent);
+  z-index: 100;
+}
+
+.timerDone {
+  border-top-color: var(--success);
+}
+
+.timerContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 14px 16px 10px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.timerTime {
+  font-size: 32px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+  min-width: 80px;
+  text-align: center;
+}
+
+.timerReadyLabel {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--success);
+  flex: 1;
+  text-align: center;
+}
+
+.timerAdjBtn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.timerAdjBtn:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.timerDismiss {
+  background: transparent;
+  color: var(--text-faint);
+  font-size: 16px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: color 0.12s;
+  margin-left: auto;
+}
+
+.timerDismiss:hover {
+  color: var(--text-muted);
+}
+
+.timerBar {
+  height: 3px;
+  background: var(--border);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.timerFill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 1s linear;
+}
+
+.timerDone .timerFill {
+  background: var(--success);
 }
 
 /* Calendar */
