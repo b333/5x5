@@ -42,6 +42,12 @@ interface HistoryEntry {
   date: string
   workout: WorkoutLabel
   exercises: { name: ExerciseName; weight: number; completed: number; total: number }[]
+  duration?: number  // seconds
+}
+
+interface BodyWeightEntry {
+  date: string  // YYYY-MM-DD
+  kg: number
 }
 
 interface AppState {
@@ -50,6 +56,7 @@ interface AppState {
   failStreak: Record<ExerciseName, number>
   session: Session | null
   history: HistoryEntry[]
+  bodyWeights: BodyWeightEntry[]
 }
 
 const DEFAULT_STATE: AppState = {
@@ -58,6 +65,7 @@ const DEFAULT_STATE: AppState = {
   failStreak: { squat: 0, benchPress: 0, barbellRow: 0, overheadPress: 0, deadlift: 0 },
   session: null,
   history: [],
+  bodyWeights: [],
 }
 
 const STORAGE_KEY = 'stronglifts-5x5'
@@ -104,6 +112,21 @@ function formatTime(s: number) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
 }
 
+function formatElapsed(s: number) {
+  const h = Math.floor(s / 3600)
+  const m = Math.floor((s % 3600) / 60)
+  const sec = s % 60
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+  return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+}
+
+function formatDuration(s: number) {
+  const h = Math.floor(s / 3600)
+  const m = Math.round((s % 3600) / 60)
+  if (h > 0) return `${h}h ${m}m`
+  return `${m} min`
+}
+
 function beep() {
   try {
     const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
@@ -134,6 +157,57 @@ export default function WorkoutTracker() {
   const [timer, setTimer] = useState<{ remaining: number; total: number } | null>(null)
   const [editingWeight, setEditingWeight] = useState<ExerciseName | null>(null)
   const [editValue, setEditValue] = useState('')
+  const [bodyWeightInput, setBodyWeightInput] = useState('')
+  const [editingBW, setEditingBW] = useState(false)
+  const [workoutElapsed, setWorkoutElapsed] = useState(0)
+  const [editingHistoryIdx, setEditingHistoryIdx] = useState<number | null>(null)
+  const [historyDraft, setHistoryDraft] = useState<{
+    exercises: { name: ExerciseName; weight: number; completed: number; total: number }[]
+    bodyWeight: string
+  } | null>(null)
+
+  function startEditHistory(idx: number) {
+    const entry = state.history[idx]
+    const dateKey = toDateKey(entry.date)
+    const bwEntry = (state.bodyWeights ?? []).find(e => e.date === dateKey)
+    setEditingHistoryIdx(idx)
+    setHistoryDraft({
+      exercises: entry.exercises.map(ex => ({ ...ex })),
+      bodyWeight: bwEntry ? String(bwEntry.kg) : '',
+    })
+  }
+
+  function saveEditHistory() {
+    if (editingHistoryIdx === null || !historyDraft) return
+    const entry = state.history[editingHistoryIdx]
+    const dateKey = toDateKey(entry.date)
+    const newHistory = state.history.map((e, i) =>
+      i === editingHistoryIdx ? { ...e, exercises: historyDraft.exercises } : e
+    )
+    let newBodyWeights = (state.bodyWeights ?? []).filter(e => e.date !== dateKey)
+    const bwParsed = parseFloat(historyDraft.bodyWeight)
+    if (!isNaN(bwParsed) && bwParsed > 0) {
+      newBodyWeights = [...newBodyWeights, { date: dateKey, kg: bwParsed }]
+    }
+    update({ ...state, history: newHistory, bodyWeights: newBodyWeights })
+    setEditingHistoryIdx(null)
+    setHistoryDraft(null)
+  }
+
+  function cancelEditHistory() {
+    setEditingHistoryIdx(null)
+    setHistoryDraft(null)
+  }
+
+  function logBodyWeight() {
+    const parsed = parseFloat(bodyWeightInput)
+    if (isNaN(parsed) || parsed <= 0) return
+    const dateKey = new Date().toISOString().slice(0, 10)
+    const existing = (state.bodyWeights ?? []).filter(e => e.date !== dateKey)
+    update({ ...state, bodyWeights: [...existing, { date: dateKey, kg: parsed }] })
+    setBodyWeightInput('')
+    setEditingBW(false)
+  }
 
   function startEditWeight(ex: ExerciseName) {
     setEditingWeight(ex)
@@ -172,6 +246,15 @@ export default function WorkoutTracker() {
     }, 1000)
     return () => clearInterval(id)
   }, [timerRunning])
+
+  useEffect(() => {
+    const startedAt = state.session?.startedAt
+    if (!startedAt) return
+    const tick = () => setWorkoutElapsed(Math.floor((Date.now() - new Date(startedAt).getTime()) / 1000))
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [state.session?.startedAt])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -247,6 +330,7 @@ export default function WorkoutTracker() {
       date: session.startedAt,
       workout: session.workout,
       exercises: historyExercises,
+      duration: workoutElapsed,
     }
 
     update({
@@ -362,7 +446,50 @@ export default function WorkoutTracker() {
                 {formatDate(session.startedAt)}
               </span>
             )}
+            {session && (
+              <span className={styles.workoutTimer}>{formatElapsed(workoutElapsed)}</span>
+            )}
           </div>
+
+          {(() => {
+            const todayKey = new Date().toISOString().slice(0, 10)
+            const todayIsMonday = new Date().getDay() === 1
+            if (!todayIsMonday) return null
+            const todayBW = (state.bodyWeights ?? []).find(e => e.date === todayKey)
+            return (
+              <div className={styles.bodyWeightCard}>
+                <span className={styles.bodyWeightLabel}>Body Weight</span>
+                {todayBW && !editingBW ? (
+                  <div className={styles.bodyWeightLogged}>
+                    <span className={styles.bodyWeightValue}>{todayBW.kg}</span>
+                    <span className={styles.bwUnit}>kg</span>
+                    <button
+                      className={styles.bodyWeightEdit}
+                      onClick={() => { setBodyWeightInput(String(todayBW.kg)); setEditingBW(true) }}
+                    >Edit</button>
+                  </div>
+                ) : (
+                  <div className={styles.bodyWeightEntry}>
+                    <input
+                      className={styles.bwInput}
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      placeholder="0.0"
+                      value={bodyWeightInput}
+                      onChange={e => setBodyWeightInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') logBodyWeight() }}
+                    />
+                    <span className={styles.bwUnit}>kg</span>
+                    <button className={styles.bodyWeightBtn} onClick={logBodyWeight}>Log</button>
+                    {editingBW && (
+                      <button className={styles.bwCancel} onClick={() => { setEditingBW(false); setBodyWeightInput('') }}>✕</button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })()}
 
           <div className={styles.exerciseList}>
             {activeExercises.map(ex => {
@@ -464,8 +591,11 @@ export default function WorkoutTracker() {
         const now = new Date()
         const todayKey = cellKey(now.getFullYear(), now.getMonth(), now.getDate())
         const workoutMap: Record<string, HistoryEntry> = {}
-        for (const entry of state.history) {
-          workoutMap[toDateKey(entry.date)] = entry
+        const workoutIndexMap: Record<string, number> = {}
+        for (let idx = 0; idx < state.history.length; idx++) {
+          const k = toDateKey(state.history[idx].date)
+          workoutMap[k] = state.history[idx]
+          workoutIndexMap[k] = idx
         }
         const firstDow = new Date(calYear, calMonth, 1).getDay()
         const offset = (firstDow + 6) % 7
@@ -475,6 +605,9 @@ export default function WorkoutTracker() {
           ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
         ]
         const selectedEntry = selectedDate ? workoutMap[selectedDate] : null
+        const selectedIdx = selectedDate !== null ? (workoutIndexMap[selectedDate] ?? -1) : -1
+        const isEditing = selectedIdx >= 0 && editingHistoryIdx === selectedIdx
+        const draft = isEditing ? historyDraft : null
 
         return (
           <main className={styles.main}>
@@ -521,10 +654,77 @@ export default function WorkoutTracker() {
                 <div className={styles.historyHeader}>
                   <span className={styles.badge}>Workout {selectedEntry.workout}</span>
                   <span className={styles.dateLabel}>{formatDate(selectedEntry.date)}</span>
+                  <div className={styles.historyActions}>
+                    {selectedEntry.duration != null && !isEditing && (
+                      <span className={styles.historyDuration}>{formatDuration(selectedEntry.duration)}</span>
+                    )}
+                    {(state.bodyWeights ?? []).find(e => e.date === selectedDate) && !isEditing && (
+                      <span className={styles.historyBW}>
+                        {(state.bodyWeights ?? []).find(e => e.date === selectedDate)!.kg}kg
+                      </span>
+                    )}
+                    {isEditing ? (
+                      <>
+                        <button className={styles.historySaveBtn} onClick={saveEditHistory}>Save</button>
+                        <button className={styles.historyCancelBtn} onClick={cancelEditHistory}>✕</button>
+                      </>
+                    ) : (
+                      <button className={styles.historyEditBtn} onClick={() => startEditHistory(selectedIdx)}>Edit</button>
+                    )}
+                  </div>
                 </div>
+                {isEditing && draft && (
+                  <div className={styles.historyEditBWRow}>
+                    <span>Body weight</span>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      placeholder="—"
+                      value={draft.bodyWeight}
+                      onChange={e => setHistoryDraft({ ...draft, bodyWeight: e.target.value })}
+                      className={styles.historyEditBWInput}
+                    />
+                    <span className={styles.bwUnit}>kg</span>
+                  </div>
+                )}
                 <div className={styles.historyExercises}>
-                  {selectedEntry.exercises.map(ex => {
+                  {(draft ? draft.exercises : selectedEntry.exercises).map((ex, exIdx) => {
                     const success = ex.completed === ex.total
+                    if (draft) {
+                      return (
+                        <div key={ex.name} className={styles.historyRow}>
+                          <span className={styles.historyExName}>{EXERCISES[ex.name].label}</span>
+                          <input
+                            type="number"
+                            step="0.5"
+                            min="0"
+                            value={ex.weight}
+                            onChange={e => {
+                              const newEx = [...draft.exercises]
+                              newEx[exIdx] = { ...newEx[exIdx], weight: parseFloat(e.target.value) || 0 }
+                              setHistoryDraft({ ...draft, exercises: newEx })
+                            }}
+                            className={styles.historyEditWeightInput}
+                          />
+                          <span className={styles.historyEditWeightUnit}>kg</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max={ex.total}
+                            value={ex.completed}
+                            onChange={e => {
+                              const val = Math.min(ex.total, Math.max(0, parseInt(e.target.value) || 0))
+                              const newEx = [...draft.exercises]
+                              newEx[exIdx] = { ...newEx[exIdx], completed: val }
+                              setHistoryDraft({ ...draft, exercises: newEx })
+                            }}
+                            className={styles.historyEditSetsInput}
+                          />
+                          <span className={styles.historyEditTotal}>/{ex.total}</span>
+                        </div>
+                      )
+                    }
                     return (
                       <div key={ex.name} className={styles.historyRow}>
                         <span className={styles.historyExName}>{EXERCISES[ex.name].label}</span>
@@ -551,30 +751,99 @@ export default function WorkoutTracker() {
             </div>
           ) : (
             <div className={styles.historyList}>
-              {state.history.map((entry, i) => (
-                <div key={i} className={styles.historyCard}>
-                  <div className={styles.historyHeader}>
-                    <span className={styles.badge}>Workout {entry.workout}</span>
-                    <span className={styles.dateLabel}>{formatDate(entry.date)}</span>
+              {state.history.map((entry, i) => {
+                const entryDateKey = toDateKey(entry.date)
+                const bwEntry = (state.bodyWeights ?? []).find(e => e.date === entryDateKey)
+                const isEditing = editingHistoryIdx === i
+                const draft = isEditing ? historyDraft : null
+                return (
+                  <div key={i} className={styles.historyCard}>
+                    <div className={styles.historyHeader}>
+                      <span className={styles.badge}>Workout {entry.workout}</span>
+                      <span className={styles.dateLabel}>{formatDate(entry.date)}</span>
+                      <div className={styles.historyActions}>
+                        {entry.duration != null && !isEditing && (
+                          <span className={styles.historyDuration}>{formatDuration(entry.duration)}</span>
+                        )}
+                        {bwEntry && !isEditing && (
+                          <span className={styles.historyBW}>{bwEntry.kg}kg</span>
+                        )}
+                        {isEditing ? (
+                          <>
+                            <button className={styles.historySaveBtn} onClick={saveEditHistory}>Save</button>
+                            <button className={styles.historyCancelBtn} onClick={cancelEditHistory}>✕</button>
+                          </>
+                        ) : (
+                          <button className={styles.historyEditBtn} onClick={() => startEditHistory(i)}>Edit</button>
+                        )}
+                      </div>
+                    </div>
+                    {isEditing && draft && (
+                      <div className={styles.historyEditBWRow}>
+                        <span>Body weight</span>
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          placeholder="—"
+                          value={draft.bodyWeight}
+                          onChange={e => setHistoryDraft({ ...draft, bodyWeight: e.target.value })}
+                          className={styles.historyEditBWInput}
+                        />
+                        <span className={styles.bwUnit}>kg</span>
+                      </div>
+                    )}
+                    <div className={styles.historyExercises}>
+                      {(draft ? draft.exercises : entry.exercises).map((ex, exIdx) => {
+                        const success = ex.completed === ex.total
+                        if (draft) {
+                          return (
+                            <div key={ex.name} className={styles.historyRow}>
+                              <span className={styles.historyExName}>{EXERCISES[ex.name].label}</span>
+                              <input
+                                type="number"
+                                step="0.5"
+                                min="0"
+                                value={ex.weight}
+                                onChange={e => {
+                                  const newEx = [...draft.exercises]
+                                  newEx[exIdx] = { ...newEx[exIdx], weight: parseFloat(e.target.value) || 0 }
+                                  setHistoryDraft({ ...draft, exercises: newEx })
+                                }}
+                                className={styles.historyEditWeightInput}
+                              />
+                              <span className={styles.historyEditWeightUnit}>kg</span>
+                              <input
+                                type="number"
+                                min="0"
+                                max={ex.total}
+                                value={ex.completed}
+                                onChange={e => {
+                                  const val = Math.min(ex.total, Math.max(0, parseInt(e.target.value) || 0))
+                                  const newEx = [...draft.exercises]
+                                  newEx[exIdx] = { ...newEx[exIdx], completed: val }
+                                  setHistoryDraft({ ...draft, exercises: newEx })
+                                }}
+                                className={styles.historyEditSetsInput}
+                              />
+                              <span className={styles.historyEditTotal}>/{ex.total}</span>
+                            </div>
+                          )
+                        }
+                        return (
+                          <div key={ex.name} className={styles.historyRow}>
+                            <span className={styles.historyExName}>{EXERCISES[ex.name].label}</span>
+                            <span className={styles.historyWeight}>{ex.weight}kg</span>
+                            <span className={`${styles.historyResult} ${success ? styles.historySuccess : styles.historyFail}`}>
+                              {ex.completed}/{ex.total}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
-                  <div className={styles.historyExercises}>
-                    {entry.exercises.map(ex => {
-                      const success = ex.completed === ex.total
-                      return (
-                        <div key={ex.name} className={styles.historyRow}>
-                          <span className={styles.historyExName}>
-                            {EXERCISES[ex.name].label}
-                          </span>
-                          <span className={styles.historyWeight}>{ex.weight}kg</span>
-                          <span className={`${styles.historyResult} ${success ? styles.historySuccess : styles.historyFail}`}>
-                            {ex.completed}/{ex.total}
-                          </span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </main>

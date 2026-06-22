@@ -78,6 +78,15 @@
   color: var(--text-muted);
 }
 
+.workoutTimer {
+  margin-left: auto;
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+  color: var(--text-muted);
+}
+
 /* Exercise cards */
 .exerciseList {
   display: flex;
@@ -557,4 +566,242 @@
 
 .historyFail {
   color: var(--danger);
+}
+
+.historyBW {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.historyDuration {
+  font-size: 15px;
+  color: var(--text-faint);
+}
+
+.historyActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.historyEditBtn {
+  background: transparent;
+  color: var(--text-faint);
+  font-size: 14px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.historyEditBtn:hover {
+  color: var(--text-muted);
+  border-color: var(--text-faint);
+}
+
+.historySaveBtn {
+  background: var(--accent);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.historySaveBtn:hover {
+  background: #ea6c10;
+}
+
+.historyCancelBtn {
+  background: transparent;
+  color: var(--text-faint);
+  font-size: 18px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.12s;
+}
+
+.historyCancelBtn:hover {
+  color: var(--text-muted);
+}
+
+.historyEditBWRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.historyEditBWInput {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--accent);
+  width: 62px;
+  text-align: right;
+  outline: none;
+  padding: 0 0 2px;
+  -moz-appearance: textfield;
+}
+
+.historyEditWeightInput {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--accent);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  width: 52px;
+  text-align: right;
+  outline: none;
+  padding: 0 0 2px;
+  margin-left: auto;
+  -moz-appearance: textfield;
+}
+
+.historyEditWeightUnit {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.historyEditSetsInput {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  width: 28px;
+  text-align: center;
+  outline: none;
+  padding: 0 0 2px;
+  margin-left: 12px;
+  -moz-appearance: textfield;
+}
+
+.historyEditTotal {
+  font-size: 16px;
+  color: var(--text-muted);
+}
+
+.historyEditBWInput::-webkit-outer-spin-button,
+.historyEditBWInput::-webkit-inner-spin-button,
+.historyEditWeightInput::-webkit-outer-spin-button,
+.historyEditWeightInput::-webkit-inner-spin-button,
+.historyEditSetsInput::-webkit-outer-spin-button,
+.historyEditSetsInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+/* Body weight card */
+.bodyWeightCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+
+.bodyWeightLabel {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+
+.bodyWeightLogged {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bodyWeightValue {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.bwUnit {
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.bodyWeightEntry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bwInput {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--accent);
+  width: 68px;
+  text-align: right;
+  outline: none;
+  padding: 0 0 2px;
+  -moz-appearance: textfield;
+}
+
+.bwInput::-webkit-outer-spin-button,
+.bwInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.bodyWeightBtn {
+  background: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.bodyWeightBtn:hover {
+  background: #ea6c10;
+}
+
+.bodyWeightEdit {
+  background: transparent;
+  color: var(--text-faint);
+  font-size: 14px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.bodyWeightEdit:hover {
+  color: var(--text-muted);
+  border-color: var(--text-faint);
+}
+
+.bwCancel {
+  background: transparent;
+  color: var(--text-faint);
+  font-size: 18px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.12s;
+}
+
+.bwCancel:hover {
+  color: var(--text-muted);
 }
