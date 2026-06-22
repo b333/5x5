@@ -1,0 +1,425 @@
+.container {
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 16px 100px;
+}
+
+/* Header */
+.header {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 0 0;
+  z-index: 10;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 0;
+}
+
+.tab {
+  flex: 1;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tabActive {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+/* Main */
+.main {
+  padding-top: 24px;
+}
+
+/* Workout header row */
+.workoutHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.dateLabel {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Exercise cards */
+.exerciseList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.exerciseCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  transition: border-color 0.2s;
+}
+
+.exerciseDone {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--bg-card) 90%, var(--success) 10%);
+}
+
+.exerciseTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.exerciseName {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.deloadWarning {
+  font-size: 11px;
+  color: var(--danger);
+  margin-top: 3px;
+}
+
+.exerciseWeight {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.weightUnit {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+/* Set buttons */
+.setRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.setBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.setBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.setDone {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+
+.setDone:hover {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: #fff;
+}
+
+.setCount {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+.setPreview {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Action buttons */
+.primaryBtn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.primaryBtn:hover:not(:disabled) {
+  background: #ea6c10;
+}
+
+.primaryBtn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btnDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.actionRow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ghostBtn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  transition: background 0.15s, color 0.15s;
+}
+
+.ghostBtn:hover {
+  background: var(--bg-card);
+  color: var(--text);
+}
+
+.resetBtn {
+  display: block;
+  margin: 20px auto 0;
+  background: transparent;
+  color: var(--text-faint);
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: color 0.15s;
+}
+
+.resetBtn:hover {
+  color: var(--danger);
+}
+
+/* Calendar */
+.calNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.calNavBtn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.calNavBtn:hover {
+  background: var(--bg-card-hover);
+}
+
+.calMonthLabel {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.calGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.calDayHeader {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-faint);
+  padding: 4px 0 8px;
+  text-transform: uppercase;
+}
+
+.calCell {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  transition: background 0.12s, border-color 0.12s;
+  padding: 0;
+}
+
+.calCell:hover {
+  background: var(--bg-card);
+}
+
+.calDayNum {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+.calToday .calDayNum {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.calHasWorkout {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
+
+.calSelected {
+  border-color: var(--accent) !important;
+  background: var(--accent-dim) !important;
+}
+
+.calDotA {
+  font-size: 9px;
+  font-weight: 700;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 3px;
+  padding: 1px 4px;
+  line-height: 1.4;
+}
+
+.calDotB {
+  font-size: 9px;
+  font-weight: 700;
+  background: var(--success);
+  color: #fff;
+  border-radius: 3px;
+  padding: 1px 4px;
+  line-height: 1.4;
+}
+
+.calDetail {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 4px;
+}
+
+/* History */
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  line-height: 1.8;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historyCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.historyHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.historyExercises {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.historyRow {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.historyExName {
+  flex: 1;
+  color: var(--text);
+}
+
+.historyWeight {
+  color: var(--text-muted);
+  margin-right: 16px;
+}
+
+.historyResult {
+  font-weight: 600;
+  min-width: 32px;
+  text-align: right;
+}
+
+.historySuccess {
+  color: var(--success);
+}
+
+.historyFail {
+  color: var(--danger);
+}
