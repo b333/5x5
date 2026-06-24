@@ -32,16 +32,34 @@ const DEFAULT_WEIGHTS: Record<ExerciseName, number> = {
   deadlift:      39.5,
 }
 
+interface CustomExerciseDef {
+  id: string
+  name: string
+  sets: number
+  reps: number
+  defaultWeight: number
+}
+
+interface ExtraExercise {
+  defId: string
+  name: string
+  sets: boolean[]
+  weight: number
+  reps: number
+}
+
 interface Session {
   workout: WorkoutLabel
   startedAt: string
   sets: Record<ExerciseName, boolean[]>
+  extras: ExtraExercise[]
 }
 
 interface HistoryEntry {
   date: string
   workout: WorkoutLabel
   exercises: { name: ExerciseName; weight: number; completed: number; total: number }[]
+  extras?: { name: string; weight: number; completed: number; total: number; reps: number }[]
   duration?: number  // seconds
 }
 
@@ -57,6 +75,8 @@ interface AppState {
   session: Session | null
   history: HistoryEntry[]
   bodyWeights: BodyWeightEntry[]
+  customExercises: CustomExerciseDef[]
+  nextCustomId: number
 }
 
 const DEFAULT_STATE: AppState = {
@@ -66,6 +86,8 @@ const DEFAULT_STATE: AppState = {
   session: null,
   history: [],
   bodyWeights: [],
+  customExercises: [],
+  nextCustomId: 1,
 }
 
 const STORAGE_KEY = 'stronglifts-5x5'
@@ -160,11 +182,108 @@ export default function WorkoutTracker() {
   const [bodyWeightInput, setBodyWeightInput] = useState('')
   const [editingBW, setEditingBW] = useState(false)
   const [workoutElapsed, setWorkoutElapsed] = useState(0)
+  const [showExercisePicker, setShowExercisePicker] = useState(false)
+  const [pickerFilter, setPickerFilter] = useState('')
+  const [newExName, setNewExName] = useState('')
+  const [newExSets, setNewExSets] = useState('3')
+  const [newExReps, setNewExReps] = useState('10')
+  const [newExWeight, setNewExWeight] = useState('20')
+  const [editingExtraIdx, setEditingExtraIdx] = useState<number | null>(null)
+  const [editExtraWeightValue, setEditExtraWeightValue] = useState('')
   const [editingHistoryIdx, setEditingHistoryIdx] = useState<number | null>(null)
   const [historyDraft, setHistoryDraft] = useState<{
     exercises: { name: ExerciseName; weight: number; completed: number; total: number }[]
     bodyWeight: string
   } | null>(null)
+
+  function closePicker() {
+    setShowExercisePicker(false)
+    setPickerFilter('')
+  }
+
+  function addCustomExercise(def: CustomExerciseDef) {
+    if (!state.session) return
+    const extra: ExtraExercise = {
+      defId: def.id,
+      name: def.name,
+      sets: Array(def.sets).fill(false),
+      weight: def.defaultWeight,
+      reps: def.reps,
+    }
+    update({ ...state, session: { ...state.session, extras: [...(state.session.extras ?? []), extra] } })
+    closePicker()
+  }
+
+  function deleteCustomExercise(id: string) {
+    const name = (state.customExercises ?? []).find(d => d.id === id)?.name ?? 'this exercise'
+    if (!confirm(`Delete "${name}" from saved exercises?`)) return
+    update({ ...state, customExercises: (state.customExercises ?? []).filter(d => d.id !== id) })
+  }
+
+  function createAndAddExercise() {
+    const name = newExName.trim()
+    if (!name) return
+    const sets = Math.max(1, parseInt(newExSets) || 3)
+    const reps = Math.max(1, parseInt(newExReps) || 10)
+    const weight = parseFloat(newExWeight) || 20
+    const id = `custom-${state.nextCustomId ?? 1}`
+    const def: CustomExerciseDef = { id, name, sets, reps, defaultWeight: weight }
+    const extra: ExtraExercise = { defId: id, name, sets: Array(sets).fill(false), weight, reps }
+    update({
+      ...state,
+      nextCustomId: (state.nextCustomId ?? 1) + 1,
+      customExercises: [...(state.customExercises ?? []), def],
+      session: state.session
+        ? { ...state.session, extras: [...(state.session.extras ?? []), extra] }
+        : state.session,
+    })
+    setNewExName('')
+    setNewExSets('3')
+    setNewExReps('10')
+    setNewExWeight('20')
+    closePicker()
+  }
+
+  function removeExtra(extraIdx: number) {
+    if (!state.session) return
+    const extras = (state.session.extras ?? []).filter((_, i) => i !== extraIdx)
+    update({ ...state, session: { ...state.session, extras } })
+  }
+
+  function toggleExtraSet(extraIdx: number, setIdx: number) {
+    if (!state.session) return
+    const wasUnchecked = !state.session.extras[extraIdx].sets[setIdx]
+    const extras = (state.session.extras ?? []).map((ex, i) => {
+      if (i !== extraIdx) return ex
+      const newSets = [...ex.sets]
+      newSets[setIdx] = !newSets[setIdx]
+      return { ...ex, sets: newSets }
+    })
+    update({ ...state, session: { ...state.session, extras } })
+    if (wasUnchecked) setTimer({ remaining: REST_SECONDS, total: REST_SECONDS })
+  }
+
+  function startEditExtraWeight(idx: number) {
+    if (!state.session) return
+    setEditingExtraIdx(idx)
+    setEditExtraWeightValue(String(state.session.extras[idx].weight))
+  }
+
+  function saveEditExtraWeight() {
+    if (editingExtraIdx === null || !state.session) return
+    const parsed = parseFloat(editExtraWeightValue)
+    if (!isNaN(parsed) && parsed > 0) {
+      const defId = state.session.extras[editingExtraIdx].defId
+      const extras = (state.session.extras ?? []).map((ex, i) =>
+        i === editingExtraIdx ? { ...ex, weight: parsed } : ex
+      )
+      const customExercises = (state.customExercises ?? []).map(def =>
+        def.id === defId ? { ...def, defaultWeight: parsed } : def
+      )
+      update({ ...state, session: { ...state.session, extras }, customExercises })
+    }
+    setEditingExtraIdx(null)
+  }
 
   function startEditHistory(idx: number) {
     const entry = state.history[idx]
@@ -283,6 +402,7 @@ export default function WorkoutTracker() {
         workout,
         startedAt: todayISO(),
         sets: sets as Record<ExerciseName, boolean[]>,
+        extras: [],
       },
     })
   }
@@ -326,10 +446,19 @@ export default function WorkoutTracker() {
       }
     }
 
+    const extras = (session.extras ?? []).map(ex => ({
+      name: ex.name,
+      weight: ex.weight,
+      completed: ex.sets.filter(Boolean).length,
+      total: ex.sets.length,
+      reps: ex.reps,
+    }))
+
     const entry: HistoryEntry = {
       date: session.startedAt,
       workout: session.workout,
       exercises: historyExercises,
+      extras: extras.length ? extras : undefined,
       duration: workoutElapsed,
     }
 
@@ -559,6 +688,126 @@ export default function WorkoutTracker() {
             })}
           </div>
 
+          {session && (session.extras ?? []).map((extra, extraIdx) => {
+            const doneCount = extra.sets.filter(Boolean).length
+            const isComplete = doneCount === extra.sets.length
+            return (
+              <div key={extraIdx} className={`${styles.exerciseCard} ${isComplete ? styles.exerciseDone : ''} ${styles.extraCard}`}>
+                <div className={styles.exerciseTop}>
+                  <div className={styles.exerciseName}>{extra.name}</div>
+                  <div className={styles.extraRight}>
+                    {editingExtraIdx === extraIdx ? (
+                      <input
+                        className={styles.weightInput}
+                        type="number"
+                        step="0.5"
+                        min="0"
+                        value={editExtraWeightValue}
+                        onChange={e => setEditExtraWeightValue(e.target.value)}
+                        onBlur={saveEditExtraWeight}
+                        onKeyDown={e => { if (e.key === 'Enter') saveEditExtraWeight(); if (e.key === 'Escape') setEditingExtraIdx(null) }}
+                        autoFocus
+                      />
+                    ) : (
+                      <button className={styles.exerciseWeight} onClick={() => startEditExtraWeight(extraIdx)}>
+                        {extra.weight}<span className={styles.weightUnit}>kg</span>
+                      </button>
+                    )}
+                    <button className={styles.extraRemoveBtn} onClick={() => removeExtra(extraIdx)}>×</button>
+                  </div>
+                </div>
+                <div className={styles.setRow}>
+                  {extra.sets.map((done, i) => (
+                    <button
+                      key={i}
+                      className={`${styles.setBtn} ${done ? styles.setDone : ''}`}
+                      onClick={() => toggleExtraSet(extraIdx, i)}
+                      aria-label={`Set ${i + 1} ${done ? 'completed' : 'incomplete'}`}
+                    >
+                      {done ? '✓' : i + 1}
+                    </button>
+                  ))}
+                  <span className={styles.setCount}>{doneCount}/{extra.sets.length} × {extra.reps}</span>
+                </div>
+              </div>
+            )
+          })}
+
+          {session && (
+            showExercisePicker ? (
+              <div className={styles.exercisePicker}>
+                <div className={styles.pickerHeader}>
+                  <span className={styles.pickerTitle}>Add Exercise</span>
+                  <button className={styles.pickerClose} onClick={closePicker}>✕</button>
+                </div>
+                {(state.customExercises ?? []).length > 0 && (() => {
+                  const filtered = (state.customExercises ?? []).filter(d =>
+                    d.name.toLowerCase().includes(pickerFilter.toLowerCase())
+                  )
+                  return (
+                    <div className={styles.pickerSaved}>
+                      <input
+                        className={styles.pickerFilterInput}
+                        type="text"
+                        placeholder="Filter saved exercises…"
+                        value={pickerFilter}
+                        onChange={e => setPickerFilter(e.target.value)}
+                      />
+                      {filtered.length === 0 && (
+                        <div className={styles.pickerNoResults}>No matches</div>
+                      )}
+                      {filtered.map(def => (
+                        <div key={def.id} className={styles.pickerSavedRow}>
+                          <button className={styles.pickerSavedAdd} onClick={() => addCustomExercise(def)}>
+                            <span className={styles.pickerSavedName}>{def.name}</span>
+                            <span className={styles.pickerSavedMeta}>{def.sets}×{def.reps} · {def.defaultWeight}kg</span>
+                          </button>
+                          <button className={styles.pickerSavedDelete} onClick={() => deleteCustomExercise(def.id)}>×</button>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })()}
+                <div className={styles.pickerNew}>
+                  <input
+                    className={styles.pickerInput}
+                    type="text"
+                    placeholder="Exercise name"
+                    value={newExName}
+                    onChange={e => setNewExName(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter' && newExName.trim()) createAndAddExercise() }}
+                    autoFocus
+                  />
+                  <div className={styles.pickerRow}>
+                    <label className={styles.pickerLabel}>
+                      Sets
+                      <input className={styles.pickerNumInput} type="number" min="1" max="10" value={newExSets} onChange={e => setNewExSets(e.target.value)} />
+                    </label>
+                    <label className={styles.pickerLabel}>
+                      Reps
+                      <input className={styles.pickerNumInput} type="number" min="1" max="50" value={newExReps} onChange={e => setNewExReps(e.target.value)} />
+                    </label>
+                    <label className={styles.pickerLabel}>
+                      Weight
+                      <input className={styles.pickerNumInput} type="number" min="0" step="0.5" value={newExWeight} onChange={e => setNewExWeight(e.target.value)} />
+                    </label>
+                  </div>
+                  <button
+                    className={`${styles.pickerAddBtn} ${!newExName.trim() ? styles.btnDisabled : ''}`}
+                    disabled={!newExName.trim()}
+                    onClick={createAndAddExercise}
+                  >
+                    Add &amp; Save
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button className={styles.addExerciseBtn} onClick={() => setShowExercisePicker(true)}>
+                + Add Exercise
+              </button>
+            )
+          )}
+
           {!session ? (
             <button className={styles.primaryBtn} onClick={startWorkout}>
               Start Workout {state.nextWorkout}
@@ -735,6 +984,21 @@ export default function WorkoutTracker() {
                       </div>
                     )
                   })}
+                  {!draft && selectedEntry.extras && selectedEntry.extras.length > 0 && (
+                    <>
+                      <div className={styles.extrasLabel}>Extras</div>
+                      {selectedEntry.extras.map((ex, i) => (
+                        <div key={i} className={styles.historyRow}>
+                          <span className={styles.historyExName}>{ex.name}</span>
+                          <span className={styles.historyWeight}>{ex.weight}kg</span>
+                          <span className={styles.historyMeta}>×{ex.reps}</span>
+                          <span className={`${styles.historyResult} ${ex.completed === ex.total ? styles.historySuccess : styles.historyFail}`}>
+                            {ex.completed}/{ex.total}
+                          </span>
+                        </div>
+                      ))}
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -840,6 +1104,21 @@ export default function WorkoutTracker() {
                           </div>
                         )
                       })}
+                      {!draft && entry.extras && entry.extras.length > 0 && (
+                        <>
+                          <div className={styles.extrasLabel}>Extras</div>
+                          {entry.extras.map((ex, i) => (
+                            <div key={i} className={styles.historyRow}>
+                              <span className={styles.historyExName}>{ex.name}</span>
+                              <span className={styles.historyWeight}>{ex.weight}kg</span>
+                              <span className={styles.historyMeta}>×{ex.reps}</span>
+                              <span className={`${styles.historyResult} ${ex.completed === ex.total ? styles.historySuccess : styles.historyFail}`}>
+                                {ex.completed}/{ex.total}
+                              </span>
+                            </div>
+                          ))}
+                        </>
+                      )}
                     </div>
                   </div>
                 )
