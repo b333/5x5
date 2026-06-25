@@ -4,8 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import styles from './workout.module.css'
 
 type ExerciseName = 'squat' | 'benchPress' | 'barbellRow' | 'overheadPress' | 'deadlift'
-type WorkoutLabel = 'A' | 'B'
-type View = 'workout' | 'history' | 'calendar'
+type WorkoutLabel = 'A' | 'B' | 'C'
+type View = 'workout' | 'calendar'
 
 interface ExerciseDef {
   label: string
@@ -407,6 +407,19 @@ export default function WorkoutTracker() {
     })
   }
 
+  function startFreeSession() {
+    update({
+      ...state,
+      session: {
+        workout: 'C',
+        startedAt: todayISO(),
+        sets: {} as Record<ExerciseName, boolean[]>,
+        extras: [],
+      },
+    })
+    setShowExercisePicker(true)
+  }
+
   function toggleSet(exercise: ExerciseName, setIndex: number) {
     if (!state.session) return
     const current = state.session.sets[exercise][setIndex]
@@ -425,7 +438,7 @@ export default function WorkoutTracker() {
   function completeWorkout() {
     if (!state.session) return
     const { session } = state
-    const exercises = session.workout === 'A' ? WORKOUT_A : WORKOUT_B
+    const exercises = session.workout === 'A' ? WORKOUT_A : session.workout === 'B' ? WORKOUT_B : []
 
     const newWeights = { ...state.weights }
     const newFailStreak = { ...state.failStreak }
@@ -466,7 +479,7 @@ export default function WorkoutTracker() {
       ...state,
       weights: newWeights,
       failStreak: newFailStreak,
-      nextWorkout: session.workout === 'A' ? 'B' : 'A',
+      nextWorkout: session.workout === 'A' ? 'B' : session.workout === 'B' ? 'A' : state.nextWorkout,
       session: null,
       history: [entry, ...state.history],
     })
@@ -527,7 +540,7 @@ export default function WorkoutTracker() {
 
   const { session } = state
   const activeExercises = session
-    ? (session.workout === 'A' ? WORKOUT_A : WORKOUT_B)
+    ? (session.workout === 'A' ? WORKOUT_A : session.workout === 'B' ? WORKOUT_B : [])
     : (state.nextWorkout === 'A' ? WORKOUT_A : WORKOUT_B)
 
   const allDone = session
@@ -550,12 +563,6 @@ export default function WorkoutTracker() {
             Workout
           </button>
           <button
-            className={`${styles.tab} ${view === 'history' ? styles.tabActive : ''}`}
-            onClick={() => setView('history')}
-          >
-            History
-          </button>
-          <button
             className={`${styles.tab} ${view === 'calendar' ? styles.tabActive : ''}`}
             onClick={() => setView('calendar')}
           >
@@ -568,7 +575,7 @@ export default function WorkoutTracker() {
         <main className={styles.main}>
           <div className={styles.workoutHeader}>
             <span className={styles.badge}>
-              Workout {session ? session.workout : state.nextWorkout}
+              {session?.workout === 'C' ? 'Free Session' : `Workout ${session ? session.workout : state.nextWorkout}`}
             </span>
             {session && (
               <span className={styles.dateLabel}>
@@ -808,11 +815,24 @@ export default function WorkoutTracker() {
             )
           )}
 
-          {!session ? (
-            <button className={styles.primaryBtn} onClick={startWorkout}>
-              Start Workout {state.nextWorkout}
-            </button>
-          ) : (
+          {!session ? (() => {
+            const dow = new Date().getDay()
+            if (dow === 0 || dow === 6) {
+              return <div className={styles.restDay}>Rest day — recover and come back strong.</div>
+            }
+            if (dow === 2 || dow === 4) {
+              return (
+                <button className={styles.primaryBtn} onClick={startFreeSession}>
+                  Start Free Session
+                </button>
+              )
+            }
+            return (
+              <button className={styles.primaryBtn} onClick={startWorkout}>
+                Start Workout {state.nextWorkout}
+              </button>
+            )
+          })() : (
             <div className={styles.actionRow}>
               <button
                 className={`${styles.primaryBtn} ${!allDone ? styles.btnDisabled : ''}`}
@@ -889,8 +909,8 @@ export default function WorkoutTracker() {
                   >
                     <span className={styles.calDayNum}>{day}</span>
                     {entry && (
-                      <span className={entry.workout === 'A' ? styles.calDotA : styles.calDotB}>
-                        {entry.workout}
+                      <span className={entry.workout === 'A' ? styles.calDotA : entry.workout === 'B' ? styles.calDotB : styles.calDotC}>
+                        {entry.workout === 'C' ? 'F' : entry.workout}
                       </span>
                     )}
                   </button>
@@ -901,7 +921,7 @@ export default function WorkoutTracker() {
             {selectedEntry && selectedDate && (
               <div className={styles.calDetail}>
                 <div className={styles.historyHeader}>
-                  <span className={styles.badge}>Workout {selectedEntry.workout}</span>
+                  <span className={styles.badge}>{selectedEntry.workout === 'C' ? 'Free Session' : `Workout ${selectedEntry.workout}`}</span>
                   <span className={styles.dateLabel}>{formatDate(selectedEntry.date)}</span>
                   <div className={styles.historyActions}>
                     {selectedEntry.duration != null && !isEditing && (
@@ -1006,127 +1026,6 @@ export default function WorkoutTracker() {
         )
       })()}
 
-      {view === 'history' && (
-        <main className={styles.main}>
-          {state.history.length === 0 ? (
-            <div className={styles.empty}>
-              <p>No workouts logged yet.</p>
-              <p>Complete your first workout to see history here.</p>
-            </div>
-          ) : (
-            <div className={styles.historyList}>
-              {state.history.map((entry, i) => {
-                const entryDateKey = toDateKey(entry.date)
-                const bwEntry = (state.bodyWeights ?? []).find(e => e.date === entryDateKey)
-                const isEditing = editingHistoryIdx === i
-                const draft = isEditing ? historyDraft : null
-                return (
-                  <div key={i} className={styles.historyCard}>
-                    <div className={styles.historyHeader}>
-                      <span className={styles.badge}>Workout {entry.workout}</span>
-                      <span className={styles.dateLabel}>{formatDate(entry.date)}</span>
-                      <div className={styles.historyActions}>
-                        {entry.duration != null && !isEditing && (
-                          <span className={styles.historyDuration}>{formatDuration(entry.duration)}</span>
-                        )}
-                        {bwEntry && !isEditing && (
-                          <span className={styles.historyBW}>{bwEntry.kg}kg</span>
-                        )}
-                        {isEditing ? (
-                          <>
-                            <button className={styles.historySaveBtn} onClick={saveEditHistory}>Save</button>
-                            <button className={styles.historyCancelBtn} onClick={cancelEditHistory}>✕</button>
-                          </>
-                        ) : (
-                          <button className={styles.historyEditBtn} onClick={() => startEditHistory(i)}>Edit</button>
-                        )}
-                      </div>
-                    </div>
-                    {isEditing && draft && (
-                      <div className={styles.historyEditBWRow}>
-                        <span>Body weight</span>
-                        <input
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          placeholder="—"
-                          value={draft.bodyWeight}
-                          onChange={e => setHistoryDraft({ ...draft, bodyWeight: e.target.value })}
-                          className={styles.historyEditBWInput}
-                        />
-                        <span className={styles.bwUnit}>kg</span>
-                      </div>
-                    )}
-                    <div className={styles.historyExercises}>
-                      {(draft ? draft.exercises : entry.exercises).map((ex, exIdx) => {
-                        const success = ex.completed === ex.total
-                        if (draft) {
-                          return (
-                            <div key={ex.name} className={styles.historyRow}>
-                              <span className={styles.historyExName}>{EXERCISES[ex.name].label}</span>
-                              <input
-                                type="number"
-                                step="0.5"
-                                min="0"
-                                value={ex.weight}
-                                onChange={e => {
-                                  const newEx = [...draft.exercises]
-                                  newEx[exIdx] = { ...newEx[exIdx], weight: parseFloat(e.target.value) || 0 }
-                                  setHistoryDraft({ ...draft, exercises: newEx })
-                                }}
-                                className={styles.historyEditWeightInput}
-                              />
-                              <span className={styles.historyEditWeightUnit}>kg</span>
-                              <input
-                                type="number"
-                                min="0"
-                                max={ex.total}
-                                value={ex.completed}
-                                onChange={e => {
-                                  const val = Math.min(ex.total, Math.max(0, parseInt(e.target.value) || 0))
-                                  const newEx = [...draft.exercises]
-                                  newEx[exIdx] = { ...newEx[exIdx], completed: val }
-                                  setHistoryDraft({ ...draft, exercises: newEx })
-                                }}
-                                className={styles.historyEditSetsInput}
-                              />
-                              <span className={styles.historyEditTotal}>/{ex.total}</span>
-                            </div>
-                          )
-                        }
-                        return (
-                          <div key={ex.name} className={styles.historyRow}>
-                            <span className={styles.historyExName}>{EXERCISES[ex.name].label}</span>
-                            <span className={styles.historyWeight}>{ex.weight}kg</span>
-                            <span className={`${styles.historyResult} ${success ? styles.historySuccess : styles.historyFail}`}>
-                              {ex.completed}/{ex.total}
-                            </span>
-                          </div>
-                        )
-                      })}
-                      {!draft && entry.extras && entry.extras.length > 0 && (
-                        <>
-                          <div className={styles.extrasLabel}>Extras</div>
-                          {entry.extras.map((ex, i) => (
-                            <div key={i} className={styles.historyRow}>
-                              <span className={styles.historyExName}>{ex.name}</span>
-                              <span className={styles.historyWeight}>{ex.weight}kg</span>
-                              <span className={styles.historyMeta}>×{ex.reps}</span>
-                              <span className={`${styles.historyResult} ${ex.completed === ex.total ? styles.historySuccess : styles.historyFail}`}>
-                                {ex.completed}/{ex.total}
-                              </span>
-                            </div>
-                          ))}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </main>
-      )}
       {timer !== null && (
         <div className={`${styles.timerWidget} ${timer.remaining === 0 ? styles.timerDone : ''}`}>
           <div className={styles.timerContent}>

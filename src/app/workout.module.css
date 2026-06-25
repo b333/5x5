@@ -246,6 +246,15 @@
   cursor: not-allowed;
 }
 
+.restDay {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-muted);
+  font-size: 17px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
 .actionRow {
   display: flex;
   flex-direction: column;
@@ -495,6 +504,16 @@
   line-height: 1.4;
 }
 
+.calDotC {
+  font-size: 10px;
+  font-weight: 700;
+  background: #6366f1;
+  color: #fff;
+  border-radius: 3px;
+  padding: 1px 4px;
+  line-height: 1.4;
+}
+
 .calDetail {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -504,20 +523,6 @@
 }
 
 /* History */
-.empty {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-muted);
-  font-size: 17px;
-  line-height: 1.8;
-}
-
-.historyList {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
 .historyCard {
   background: var(--bg-card);
   border: 1px solid var(--border);
