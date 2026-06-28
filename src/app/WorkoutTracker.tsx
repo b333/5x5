@@ -25,6 +25,7 @@ export default function WorkoutTracker() {
   const importRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setState(load())
     setHydrated(true)
   }, [])
