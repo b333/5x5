@@ -1065,3 +1065,78 @@
 .bwCancel:hover {
   color: var(--text-muted);
 }
+
+/* Progress view */
+.progressList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progressCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.progressHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.progressExName {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.progressCurrentWeight {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.progressStats {
+  display: flex;
+  gap: 8px;
+}
+
+.progressStat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 8px;
+}
+
+.progressStatValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.progressStatLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.progressEmpty {
+  font-size: 15px;
+  color: var(--text-faint);
+  text-align: center;
+  padding: 8px 0;
+}

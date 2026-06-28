@@ -12,8 +12,9 @@ import { BodyWeightCard } from './components/BodyWeightCard'
 import { ExercisePicker } from './components/ExercisePicker'
 import { RestTimer } from './components/RestTimer'
 import { CalendarView } from './components/CalendarView'
+import { ProgressView } from './components/ProgressView'
 
-type View = 'workout' | 'calendar'
+type View = 'workout' | 'progress' | 'calendar'
 
 export default function WorkoutTracker() {
   const [state, setState] = useState<AppState>(DEFAULT_STATE)
@@ -258,6 +259,7 @@ export default function WorkoutTracker() {
         <h1 className={styles.logo}>StrongLifts 5×5</h1>
         <nav className={styles.tabs}>
           <button className={`${styles.tab} ${view === 'workout' ? styles.tabActive : ''}`} onClick={() => setView('workout')}>Workout</button>
+          <button className={`${styles.tab} ${view === 'progress' ? styles.tabActive : ''}`} onClick={() => setView('progress')}>Progress</button>
           <button className={`${styles.tab} ${view === 'calendar' ? styles.tabActive : ''}`} onClick={() => setView('calendar')}>Calendar</button>
         </nav>
       </header>
@@ -338,6 +340,10 @@ export default function WorkoutTracker() {
             <input ref={importRef} type="file" accept=".json" className={styles.fileInput} onChange={importData} />
           </div>
         </main>
+      )}
+
+      {view === 'progress' && (
+        <ProgressView history={state.history} weights={state.weights} />
       )}
 
       {view === 'calendar' && (
