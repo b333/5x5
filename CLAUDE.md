@@ -10,6 +10,8 @@ A mobile-first Next.js app for tracking the Stronglifts 5×5 barbell programme. 
 - **Workout A**: Squat 5×5, Bench Press 5×5, Barbell Row 5×5
 - **Workout B**: Squat 5×5, Overhead Press 5×5, Deadlift 1×5
 
+Workouts follow a weekly schedule: Monday/Wednesday/Friday run the next A/B workout, Tuesday/Thursday offer a **Free Session** (workout `'C'` — pick any exercises via the exercise picker, no fixed exercise list), and weekends show a rest-day message with no session available.
+
 The app tracks which workout is next, the current working weight for each exercise, and a full session history.
 
 ### Core behaviours
@@ -31,25 +33,25 @@ Tap the weight display on any exercise card to edit it inline. Enter or blur sav
 
 ### Extra exercises
 During an active session a "+ Add Exercise" button (dashed border) appears below the standard exercise cards. Tapping it opens a picker with:
-- **Saved exercises** — previously created exercises listed as tap targets (name + sets×reps + default weight). Tap to add instantly.
+- **Saved exercises** — previously created exercises listed as tap targets (name + sets×reps + default weight). Tap to add instantly, or tap the ✎ button to expand an inline form and override sets/reps/weight for this add only (the saved default is unchanged).
 - **New exercise form** — enter name, sets, reps, weight, then "Add & Save". The exercise is saved to the library and added to the session.
 
-Added exercise cards behave like standard ones (set buttons, inline weight editing, rest timer). There is a × button to remove them. Editing a weight also updates the saved default. Extras are recorded in history and shown in History/Calendar cards under an "Extras" label.
+Added exercise cards behave like standard ones (set buttons, inline weight editing, rest timer). There is a × button to remove them. Editing a weight also updates the saved default. Extras are recorded in history and shown on Calendar detail cards under an "Extras" label.
 
 ### Body weight tracking
-On Mondays, a "Body Weight" card appears above the exercise list. Enter weight in kg and tap "Log". After logging the value is displayed with an "Edit" button. Body weight entries are shown on History and Calendar cards for the matching date.
+On Mondays, a "Body Weight" card appears above the exercise list. Enter weight in kg and tap "Log". After logging the value is displayed with an "Edit" button. Body weight entries are shown on Calendar detail cards for the matching date.
 
 ### Views
 | Tab | Description |
 |---|---|
 | Workout | Current/next session with set tracking |
-| History | Chronological list of completed sessions with duration, body weight, and extras |
-| Calendar | Month grid with A/B dots; tap a day to see exercise results |
+| Progress | Per-exercise stats (session count, personal best, success rate) and a weight-over-time sparkline |
+| Calendar | Month grid with A/B/F dots (F = Free Session); tap a day to see that session's results |
 
 ### History editing
-Each history card (in both the History tab and the Calendar detail panel) has an **Edit** button. Edit mode allows inline editing of:
+The Calendar day-detail panel for a past session has an **Edit** button. Edit mode allows inline editing of:
 - Body weight for that day
-- Exercise weight and completed set count per exercise
+- Exercise and extra weight, completed set count, and total set count
 - Save / ✕ Cancel
 
 ### Data management
@@ -62,13 +64,26 @@ Three small buttons at the bottom of the Workout tab:
 
 ```
 src/app/
-  layout.tsx          — root layout, metadata ("StrongLifts 5×5")
-  page.tsx            — server component, renders <WorkoutTracker>
-  WorkoutTracker.tsx  — single client component containing all logic and UI
-  workout.module.css  — all component styles (dark athletic theme)
-  globals.css         — CSS variables and base reset
+  layout.tsx            — root layout, metadata ("StrongLifts 5×5")
+  page.tsx              — server component, renders <WorkoutTracker>
+  WorkoutTracker.tsx    — client component: state, handlers, and the Workout tab layout
+  workout.module.css    — all component styles (dark athletic theme)
+  globals.css           — CSS variables and base reset
+  components/
+    ExerciseCard.tsx    — standard exercise card (sets, weight editing, deload warning)
+    ExtraCard.tsx       — extra/custom exercise card
+    BodyWeightCard.tsx  — Monday body weight logging card
+    ExercisePicker.tsx  — add-exercise picker (saved list + new exercise form)
+    RestTimer.tsx       — fixed bottom rest timer overlay
+    CalendarView.tsx    — Calendar tab, including day detail/edit panel
+    ProgressView.tsx    — Progress tab (per-exercise stats + sparklines)
+  lib/
+    types.ts            — shared TypeScript types
+    constants.ts        — exercise defs, workout lists, rest duration
+    storage.ts          — localStorage load/save
+    utils.ts            — date/formatting helpers
 public/
-  sw.js               — service worker (cache-first static, network-first navigation)
+  sw.js                 — service worker (cache-first static, network-first navigation)
 ```
 
 ## Data model (localStorage key: `stronglifts-5x5`)
@@ -86,7 +101,7 @@ interface AppState {
 }
 
 interface Session {
-  workout: 'A' | 'B'
+  workout: 'A' | 'B' | 'C'  // 'C' = Free Session
   startedAt: string        // ISO timestamp (used to determine day-of-week for Monday check)
   sets: Record<ExerciseName, boolean[]>
   extras: ExtraExercise[]
@@ -94,7 +109,7 @@ interface Session {
 
 interface HistoryEntry {
   date: string
-  workout: 'A' | 'B'
+  workout: 'A' | 'B' | 'C'
   exercises: { name: ExerciseName; weight: number; completed: number; total: number }[]
   extras?: { name: string; weight: number; completed: number; total: number; reps: number }[]
   duration?: number        // seconds
