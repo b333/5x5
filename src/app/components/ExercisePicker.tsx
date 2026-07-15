@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import styles from '../workout.module.css'
-import type { CustomExerciseDef } from '../lib/types'
+import type { CustomExerciseDef, Weight } from '../lib/types'
+import { parseWeightInput, formatWeight } from '../lib/utils'
 
 interface Props {
   customExercises: CustomExerciseDef[]
   onAdd: (def: CustomExerciseDef) => void
-  onCreate: (name: string, sets: number, reps: number, weight: number) => void
+  onCreate: (name: string, sets: number, reps: number, weight: Weight) => void
   onDelete: (id: string) => void
   onClose: () => void
 }
@@ -37,7 +38,7 @@ export function ExercisePicker({ customExercises, onAdd, onCreate, onDelete, onC
       ...def,
       sets: Math.max(1, parseInt(draftSets) || def.sets),
       reps: Math.max(1, parseInt(draftReps) || def.reps),
-      defaultWeight: parseFloat(draftWeight) || def.defaultWeight,
+      defaultWeight: parseWeightInput(draftWeight) ?? def.defaultWeight,
     })
     setExpandedId(null)
   }
@@ -45,7 +46,7 @@ export function ExercisePicker({ customExercises, onAdd, onCreate, onDelete, onC
   function handleCreate() {
     const trimmed = name.trim()
     if (!trimmed) return
-    onCreate(trimmed, Math.max(1, parseInt(sets) || 3), Math.max(1, parseInt(reps) || 10), parseFloat(weight) || 20)
+    onCreate(trimmed, Math.max(1, parseInt(sets) || 3), Math.max(1, parseInt(reps) || 10), parseWeightInput(weight) ?? 20)
     setName('')
     setSets('3')
     setReps('10')
@@ -81,7 +82,7 @@ export function ExercisePicker({ customExercises, onAdd, onCreate, onDelete, onC
               <div className={styles.pickerSavedRow}>
                 <button className={styles.pickerSavedAdd} onClick={() => onAdd(def)}>
                   <span className={styles.pickerSavedName}>{def.name}</span>
-                  <span className={styles.pickerSavedMeta}>{def.sets}×{def.reps} · {def.defaultWeight}kg</span>
+                  <span className={styles.pickerSavedMeta}>{def.sets}×{def.reps} · {formatWeight(def.defaultWeight)}</span>
                 </button>
                 <button className={styles.pickerSavedEdit} onClick={() => toggleExpand(def)} aria-label={`Edit ${def.name} before adding`}>
                   {expandedId === def.id ? '︿' : '✎'}
@@ -101,7 +102,7 @@ export function ExercisePicker({ customExercises, onAdd, onCreate, onDelete, onC
                     </label>
                     <label className={styles.pickerLabel}>
                       Weight
-                      <input className={styles.pickerNumInput} type="number" min="0" step="0.5" value={draftWeight} onChange={e => setDraftWeight(e.target.value)} />
+                      <input className={styles.pickerNumInput} type="text" inputMode="decimal" placeholder="kg or BW" value={draftWeight} onChange={e => setDraftWeight(e.target.value)} />
                     </label>
                   </div>
                   <button className={styles.pickerExpandAddBtn} onClick={() => handleAddExpanded(def)}>Add</button>
@@ -132,7 +133,7 @@ export function ExercisePicker({ customExercises, onAdd, onCreate, onDelete, onC
           </label>
           <label className={styles.pickerLabel}>
             Weight
-            <input className={styles.pickerNumInput} type="number" min="0" step="0.5" value={weight} onChange={e => setWeight(e.target.value)} />
+            <input className={styles.pickerNumInput} type="text" inputMode="decimal" placeholder="kg or BW" value={weight} onChange={e => setWeight(e.target.value)} />
           </label>
         </div>
         <button

@@ -7,19 +7,22 @@ export interface ExerciseDef {
   increment: number
 }
 
+// A weight of 'bw' marks a bodyweight exercise (dips, pull-ups) with no plate load.
+export type Weight = number | 'bw'
+
 export interface CustomExerciseDef {
   id: string
   name: string
   sets: number
   reps: number
-  defaultWeight: number
+  defaultWeight: Weight
 }
 
 export interface ExtraExercise {
   defId: string
   name: string
   sets: boolean[]
-  weight: number
+  weight: Weight
   reps: number
 }
 
@@ -34,7 +37,7 @@ export interface HistoryEntry {
   date: string
   workout: WorkoutLabel
   exercises: { name: ExerciseName; weight: number; completed: number; total: number }[]
-  extras?: { name: string; weight: number; completed: number; total: number; reps: number }[]
+  extras?: { name: string; weight: Weight; completed: number; total: number; reps: number }[]
   duration?: number
 }
 

@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import styles from '../workout.module.css'
-import type { HistoryEntry, BodyWeightEntry, CustomExerciseDef } from '../lib/types'
+import type { HistoryEntry, BodyWeightEntry, CustomExerciseDef, Weight } from '../lib/types'
 import { EXERCISES, MONTHS, DAY_HEADERS, STANDARD_REPS } from '../lib/constants'
-import { formatDate, formatDuration, toDateKey, cellKey } from '../lib/utils'
+import { formatDate, formatDuration, formatWeight, toDateKey, cellKey } from '../lib/utils'
 import { HistoryEditModal } from './HistoryEditModal'
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
   bodyWeights: BodyWeightEntry[]
   customExercises: CustomExerciseDef[]
   onSaveHistory: (historyIdx: number, exercises: HistoryEntry['exercises'], extras: HistoryEntry['extras'], newBWKg: number | null) => void
-  onCreateCustomExercise: (name: string, sets: number, reps: number, weight: number) => CustomExerciseDef
+  onCreateCustomExercise: (name: string, sets: number, reps: number, weight: Weight) => CustomExerciseDef
   onDeleteCustomExercise: (id: string) => void
 }
 
@@ -62,7 +62,7 @@ export function CalendarView({ history, bodyWeights, customExercises, onSaveHist
   const selectedEntry = selectedDate ? workoutMap[selectedDate] : null
   const selectedTotalLift = selectedEntry
     ? selectedEntry.exercises.reduce((sum, ex) => sum + ex.weight * STANDARD_REPS * ex.completed, 0)
-      + (selectedEntry.extras ?? []).reduce((sum, ex) => sum + ex.weight * ex.reps * ex.completed, 0)
+      + (selectedEntry.extras ?? []).reduce((sum, ex) => sum + (ex.weight === 'bw' ? 0 : ex.weight * ex.reps * ex.completed), 0)
     : 0
   const selectedIdx = selectedDate !== null ? (workoutIndexMap[selectedDate] ?? -1) : -1
   const editingEntry = editingHistoryIdx !== null ? history[editingHistoryIdx] : null
@@ -146,7 +146,7 @@ export function CalendarView({ history, bodyWeights, customExercises, onSaveHist
                 {selectedEntry.extras.map((ex, i) => (
                   <div key={i} className={styles.historyRow}>
                     <span className={styles.historyExName}>{ex.name}</span>
-                    <span className={styles.historyWeight}>{ex.weight}kg</span>
+                    <span className={styles.historyWeight}>{formatWeight(ex.weight)}</span>
                     <span className={styles.historyMeta}>×{ex.reps}</span>
                     <span className={`${styles.historyResult} ${ex.completed === ex.total ? styles.historySuccess : styles.historyFail}`}>
                       {ex.completed}/{ex.total}

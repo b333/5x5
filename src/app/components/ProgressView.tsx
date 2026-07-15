@@ -20,7 +20,7 @@ export function ProgressView({ history, weights }: Props) {
   let totalVolume = 0
   for (const entry of history) {
     for (const ex of entry.exercises) totalVolume += ex.weight * STANDARD_REPS * ex.completed
-    for (const ex of entry.extras ?? []) totalVolume += ex.weight * ex.reps * ex.completed
+    for (const ex of entry.extras ?? []) if (ex.weight !== 'bw') totalVolume += ex.weight * ex.reps * ex.completed
   }
 
   return (

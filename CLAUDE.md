@@ -38,6 +38,8 @@ During an active session a "+ Add Exercise" button (dashed border) appears below
 
 Added exercise cards behave like standard ones (set buttons, inline weight editing, rest timer). There is a × button to remove them. Editing a weight also updates the saved default. Extras are recorded in history and shown on Calendar detail cards under an "Extras" label.
 
+Custom exercise weight fields (new exercise form, saved-exercise override, extra card weight edit, history edit) accept `bw`/`BW` instead of a number to mark a bodyweight exercise (dips, pull-ups). Displayed as "BW" instead of a numeric + kg. Bodyweight sets are excluded from the total weight lifted / total lift volume figures (no plate weight to sum).
+
 ### Body weight tracking
 On Mondays, a "Body Weight" card appears above the exercise list. Enter weight in kg and tap "Log". After logging the value is displayed with an "Edit" button. Body weight entries are shown on Calendar detail cards for the matching date.
 
@@ -49,7 +51,7 @@ On Mondays, a "Body Weight" card appears above the exercise list. Enter weight i
 | Calendar | Month grid with A/B/F dots (F = Free Session); tap a day to see that session's results |
 
 ### Total weight lifted (volume)
-Volume is `weight × reps × completed sets`, summed across exercises (reps = `STANDARD_REPS`, 5) and extras (reps = the extra's own rep count). The Progress tab's "Total Weight Lifted" card sums this across all history. The Calendar day-detail panel shows the same figure for just that day as "Total lift".
+Volume is `weight × reps × completed sets`, summed across exercises (reps = `STANDARD_REPS`, 5) and extras (reps = the extra's own rep count). BW (bodyweight) extras contribute 0. The Progress tab's "Total Weight Lifted" card sums this across all history. The Calendar day-detail panel shows the same figure for just that day as "Total lift".
 
 ### History editing
 The Calendar day-detail panel for a past session has an **Edit** button that opens a bottom-sheet modal (`HistoryEditModal`) covering most of the viewport. It allows editing:
@@ -115,7 +117,7 @@ interface HistoryEntry {
   date: string
   workout: 'A' | 'B' | 'C'
   exercises: { name: ExerciseName; weight: number; completed: number; total: number }[]
-  extras?: { name: string; weight: number; completed: number; total: number; reps: number }[]
+  extras?: { name: string; weight: Weight; completed: number; total: number; reps: number }[]
   duration?: number        // seconds
 }
 
@@ -129,16 +131,18 @@ interface CustomExerciseDef {
   name: string
   sets: number
   reps: number
-  defaultWeight: number    // updated when weight is edited during a session
+  defaultWeight: Weight    // updated when weight is edited during a session
 }
 
 interface ExtraExercise {
   defId: string
   name: string             // copied from def at add-time
   sets: boolean[]
-  weight: number
+  weight: Weight
   reps: number             // copied from def at add-time
 }
+
+type Weight = number | 'bw' // 'bw' marks a bodyweight exercise (dips, pull-ups)
 ```
 
 ## Design

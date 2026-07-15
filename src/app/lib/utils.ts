@@ -1,3 +1,17 @@
+import type { Weight } from './types'
+
+// Accepts "bw"/"BW" (bodyweight) or a positive number; returns null for anything else.
+export function parseWeightInput(raw: string): Weight | null {
+  const trimmed = raw.trim()
+  if (trimmed.toLowerCase() === 'bw') return 'bw'
+  const parsed = parseFloat(trimmed)
+  return !isNaN(parsed) && parsed > 0 ? parsed : null
+}
+
+export function formatWeight(w: Weight) {
+  return w === 'bw' ? 'BW' : `${w}kg`
+}
+
 export function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-GB', {
     weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',

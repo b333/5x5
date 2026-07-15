@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import styles from './workout.module.css'
-import type { AppState, ExerciseName, ExtraExercise, CustomExerciseDef, HistoryEntry } from './lib/types'
+import type { AppState, ExerciseName, ExtraExercise, CustomExerciseDef, HistoryEntry, Weight } from './lib/types'
 import { EXERCISES, WORKOUT_A, WORKOUT_B, DEFAULT_STATE, REST_SECONDS } from './lib/constants'
 import { load, save } from './lib/storage'
 import { todayISO, toDateKey, formatDate, formatElapsed, beep } from './lib/utils'
@@ -102,7 +102,7 @@ export default function WorkoutTracker() {
     update({ ...state, weights: { ...state.weights, [ex]: newWeight } })
   }
 
-  function saveExtraWeight(extraIdx: number, newWeight: number) {
+  function saveExtraWeight(extraIdx: number, newWeight: Weight) {
     if (!state.session) return
     const defId = state.session.extras[extraIdx].defId
     const extras = (state.session.extras ?? []).map((ex, i) => i === extraIdx ? { ...ex, weight: newWeight } : ex)
@@ -128,7 +128,7 @@ export default function WorkoutTracker() {
     setShowExercisePicker(false)
   }
 
-  function createAndAddExercise(name: string, sets: number, reps: number, weight: number) {
+  function createAndAddExercise(name: string, sets: number, reps: number, weight: Weight) {
     const id = `custom-${state.nextCustomId ?? 1}`
     const def: CustomExerciseDef = { id, name, sets, reps, defaultWeight: weight }
     const extra: ExtraExercise = { defId: id, name, sets: Array(sets).fill(false), weight, reps }
@@ -147,7 +147,7 @@ export default function WorkoutTracker() {
     update({ ...state, customExercises: (state.customExercises ?? []).filter(d => d.id !== id) })
   }
 
-  function saveCustomExerciseDef(name: string, sets: number, reps: number, weight: number): CustomExerciseDef {
+  function saveCustomExerciseDef(name: string, sets: number, reps: number, weight: Weight): CustomExerciseDef {
     const id = `custom-${state.nextCustomId ?? 1}`
     const def: CustomExerciseDef = { id, name, sets, reps, defaultWeight: weight }
     update({

@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import styles from '../workout.module.css'
-import type { HistoryEntry, CustomExerciseDef } from '../lib/types'
+import type { HistoryEntry, CustomExerciseDef, Weight } from '../lib/types'
 import { EXERCISES } from '../lib/constants'
-import { formatDate } from '../lib/utils'
+import { formatDate, parseWeightInput } from '../lib/utils'
 import { ExercisePicker } from './ExercisePicker'
 
 interface Props {
@@ -13,23 +13,25 @@ interface Props {
   customExercises: CustomExerciseDef[]
   onSave: (exercises: HistoryEntry['exercises'], extras: HistoryEntry['extras'], newBWKg: number | null) => void
   onClose: () => void
-  onCreateCustomExercise: (name: string, sets: number, reps: number, weight: number) => CustomExerciseDef
+  onCreateCustomExercise: (name: string, sets: number, reps: number, weight: Weight) => CustomExerciseDef
   onDeleteCustomExercise: (id: string) => void
 }
 
 export function HistoryEditModal({ entry, bodyWeightKg, customExercises, onSave, onClose, onCreateCustomExercise, onDeleteCustomExercise }: Props) {
   const [exercises, setExercises] = useState(() => entry.exercises.map(ex => ({ ...ex })))
-  const [extras, setExtras] = useState(() => (entry.extras ?? []).map(ex => ({ ...ex })))
+  // weight is kept as a raw string draft (parsed only on save) so typing "bw" isn't rejected mid-keystroke.
+  const [extras, setExtras] = useState(() => (entry.extras ?? []).map(ex => ({ ...ex, weight: String(ex.weight) })))
   const [bodyWeight, setBodyWeight] = useState(bodyWeightKg != null ? String(bodyWeightKg) : '')
   const [showPicker, setShowPicker] = useState(false)
 
   function handleSave() {
     const bwParsed = parseFloat(bodyWeight)
-    onSave(exercises, extras.length ? extras : undefined, !isNaN(bwParsed) && bwParsed > 0 ? bwParsed : null)
+    const savedExtras = extras.map(ex => ({ ...ex, weight: parseWeightInput(ex.weight) ?? 0 }))
+    onSave(exercises, savedExtras.length ? savedExtras : undefined, !isNaN(bwParsed) && bwParsed > 0 ? bwParsed : null)
   }
 
-  function addExtraEntry(name: string, weight: number, sets: number, reps: number) {
-    setExtras(prev => [...prev, { name, weight, completed: sets, total: sets, reps }])
+  function addExtraEntry(name: string, weight: Weight, sets: number, reps: number) {
+    setExtras(prev => [...prev, { name, weight: String(weight), completed: sets, total: sets, reps }])
     setShowPicker(false)
   }
 
@@ -37,7 +39,7 @@ export function HistoryEditModal({ entry, bodyWeightKg, customExercises, onSave,
     addExtraEntry(def.name, def.defaultWeight, def.sets, def.reps)
   }
 
-  function handleCreateExtra(name: string, sets: number, reps: number, weight: number) {
+  function handleCreateExtra(name: string, sets: number, reps: number, weight: Weight) {
     onCreateCustomExercise(name, sets, reps, weight)
     addExtraEntry(name, weight, sets, reps)
   }
@@ -127,18 +129,17 @@ export function HistoryEditModal({ entry, bodyWeightKg, customExercises, onSave,
                   <div key={exIdx} className={styles.historyRow}>
                     <span className={styles.historyExName}>{ex.name}</span>
                     <input
-                      type="number"
-                      step="0.5"
-                      min="0"
+                      type="text"
+                      inputMode="decimal"
                       value={ex.weight}
                       onChange={e => {
                         const newExtras = [...extras]
-                        newExtras[exIdx] = { ...newExtras[exIdx], weight: parseFloat(e.target.value) || 0 }
+                        newExtras[exIdx] = { ...newExtras[exIdx], weight: e.target.value }
                         setExtras(newExtras)
                       }}
                       className={styles.historyEditWeightInput}
                     />
-                    <span className={styles.historyEditWeightUnit}>kg</span>
+                    <span className={styles.historyEditWeightUnit}>{ex.weight.trim().toLowerCase() === 'bw' ? '' : 'kg'}</span>
                     <input
                       type="number"
                       min="0"

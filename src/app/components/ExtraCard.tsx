@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import styles from '../workout.module.css'
-import type { ExtraExercise } from '../lib/types'
+import type { ExtraExercise, Weight } from '../lib/types'
+import { parseWeightInput } from '../lib/utils'
 
 interface Props {
   extra: ExtraExercise
   onToggleSet: (setIdx: number) => void
-  onWeightSave: (newWeight: number) => void
+  onWeightSave: (newWeight: Weight) => void
   onRemove: () => void
 }
 
@@ -23,8 +24,8 @@ export function ExtraCard({ extra, onToggleSet, onWeightSave, onRemove }: Props)
   }
 
   function saveEdit() {
-    const parsed = parseFloat(editValue)
-    if (!isNaN(parsed) && parsed > 0) onWeightSave(parsed)
+    const parsed = parseWeightInput(editValue)
+    if (parsed !== null) onWeightSave(parsed)
     setEditing(false)
   }
 
@@ -36,9 +37,8 @@ export function ExtraCard({ extra, onToggleSet, onWeightSave, onRemove }: Props)
           {editing ? (
             <input
               className={styles.weightInput}
-              type="number"
-              step="0.5"
-              min="0"
+              type="text"
+              inputMode="decimal"
               value={editValue}
               onChange={e => setEditValue(e.target.value)}
               onBlur={saveEdit}
@@ -50,7 +50,7 @@ export function ExtraCard({ extra, onToggleSet, onWeightSave, onRemove }: Props)
             />
           ) : (
             <button className={styles.exerciseWeight} onClick={startEdit}>
-              {extra.weight}<span className={styles.weightUnit}>kg</span>
+              {extra.weight === 'bw' ? 'BW' : <>{extra.weight}<span className={styles.weightUnit}>kg</span></>}
             </button>
           )}
           <button className={styles.extraRemoveBtn} onClick={onRemove}>×</button>
