@@ -49,10 +49,10 @@ On Mondays, a "Body Weight" card appears above the exercise list. Enter weight i
 | Calendar | Month grid with A/B/F dots (F = Free Session); tap a day to see that session's results |
 
 ### History editing
-The Calendar day-detail panel for a past session has an **Edit** button. Edit mode allows inline editing of:
+The Calendar day-detail panel for a past session has an **Edit** button that opens a bottom-sheet modal (`HistoryEditModal`) covering most of the viewport. It allows editing:
 - Body weight for that day
 - Exercise and extra weight, completed set count, and total set count
-- Save / ✕ Cancel
+- Save / ✕ Cancel (or tap the backdrop to cancel)
 
 ### Data management
 Three small buttons at the bottom of the Workout tab:
