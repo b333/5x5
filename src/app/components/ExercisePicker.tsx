@@ -102,7 +102,7 @@ export function ExercisePicker({ customExercises, onAdd, onCreate, onDelete, onC
                     </label>
                     <label className={styles.pickerLabel}>
                       Weight
-                      <input className={styles.pickerNumInput} type="text" inputMode="decimal" placeholder="kg or BW" value={draftWeight} onChange={e => setDraftWeight(e.target.value)} />
+                      <input className={styles.pickerNumInput} type="text" placeholder="kg or BW" value={draftWeight} onChange={e => setDraftWeight(e.target.value)} />
                     </label>
                   </div>
                   <button className={styles.pickerExpandAddBtn} onClick={() => handleAddExpanded(def)}>Add</button>
@@ -133,7 +133,7 @@ export function ExercisePicker({ customExercises, onAdd, onCreate, onDelete, onC
           </label>
           <label className={styles.pickerLabel}>
             Weight
-            <input className={styles.pickerNumInput} type="text" inputMode="decimal" placeholder="kg or BW" value={weight} onChange={e => setWeight(e.target.value)} />
+            <input className={styles.pickerNumInput} type="text" placeholder="kg or BW" value={weight} onChange={e => setWeight(e.target.value)} />
           </label>
         </div>
         <button

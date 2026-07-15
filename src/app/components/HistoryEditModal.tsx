@@ -130,7 +130,6 @@ export function HistoryEditModal({ entry, bodyWeightKg, customExercises, onSave,
                     <span className={styles.historyExName}>{ex.name}</span>
                     <input
                       type="text"
-                      inputMode="decimal"
                       value={ex.weight}
                       onChange={e => {
                         const newExtras = [...extras]

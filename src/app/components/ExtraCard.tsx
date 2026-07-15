@@ -38,7 +38,6 @@ export function ExtraCard({ extra, onToggleSet, onWeightSave, onRemove }: Props)
             <input
               className={styles.weightInput}
               type="text"
-              inputMode="decimal"
               value={editValue}
               onChange={e => setEditValue(e.target.value)}
               onBlur={saveEdit}
