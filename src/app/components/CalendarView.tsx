@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import styles from '../workout.module.css'
 import type { HistoryEntry, BodyWeightEntry } from '../lib/types'
-import { EXERCISES, MONTHS, DAY_HEADERS } from '../lib/constants'
+import { EXERCISES, MONTHS, DAY_HEADERS, STANDARD_REPS } from '../lib/constants'
 import { formatDate, formatDuration, toDateKey, cellKey } from '../lib/utils'
 import { HistoryEditModal } from './HistoryEditModal'
 
@@ -57,6 +57,10 @@ export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
   ]
 
   const selectedEntry = selectedDate ? workoutMap[selectedDate] : null
+  const selectedTotalLift = selectedEntry
+    ? selectedEntry.exercises.reduce((sum, ex) => sum + ex.weight * STANDARD_REPS * ex.completed, 0)
+      + (selectedEntry.extras ?? []).reduce((sum, ex) => sum + ex.weight * ex.reps * ex.completed, 0)
+    : 0
   const selectedIdx = selectedDate !== null ? (workoutIndexMap[selectedDate] ?? -1) : -1
   const editingEntry = editingHistoryIdx !== null ? history[editingHistoryIdx] : null
 
@@ -147,6 +151,11 @@ export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
                   </div>
                 ))}
               </>
+            )}
+            {selectedTotalLift > 0 && (
+              <div className={styles.historyTotalLift}>
+                Total lift: <span>{Math.round(selectedTotalLift).toLocaleString()}kg</span>
+              </div>
             )}
           </div>
         </div>

@@ -45,8 +45,11 @@ On Mondays, a "Body Weight" card appears above the exercise list. Enter weight i
 | Tab | Description |
 |---|---|
 | Workout | Current/next session with set tracking |
-| Progress | Per-exercise stats (session count, personal best, success rate) and a weight-over-time sparkline |
+| Progress | Total weight lifted card (all-time volume) at top, then per-exercise stats (session count, personal best, success rate) and a weight-over-time sparkline |
 | Calendar | Month grid with A/B/F dots (F = Free Session); tap a day to see that session's results |
+
+### Total weight lifted (volume)
+Volume is `weight × reps × completed sets`, summed across exercises (reps = `STANDARD_REPS`, 5) and extras (reps = the extra's own rep count). The Progress tab's "Total Weight Lifted" card sums this across all history. The Calendar day-detail panel shows the same figure for just that day as "Total lift".
 
 ### History editing
 The Calendar day-detail panel for a past session has an **Edit** button that opens a bottom-sheet modal (`HistoryEditModal`) covering most of the viewport. It allows editing:

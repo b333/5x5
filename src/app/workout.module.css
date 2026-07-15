@@ -601,6 +601,19 @@
   margin-right: 8px;
 }
 
+.historyTotalLift {
+  font-size: 15px;
+  color: var(--text-faint);
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.historyTotalLift span {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
 .historyActions {
   display: flex;
   align-items: center;
