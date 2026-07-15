@@ -2,7 +2,7 @@
 
 import styles from '../workout.module.css'
 import type { HistoryEntry, ExerciseName } from '../lib/types'
-import { EXERCISES } from '../lib/constants'
+import { EXERCISES, STANDARD_REPS } from '../lib/constants'
 
 const ALL_EXERCISES: ExerciseName[] = ['squat', 'benchPress', 'barbellRow', 'overheadPress', 'deadlift']
 
@@ -17,8 +17,25 @@ interface Props {
 }
 
 export function ProgressView({ history, weights }: Props) {
+  let totalVolume = 0
+  for (const entry of history) {
+    for (const ex of entry.exercises) totalVolume += ex.weight * STANDARD_REPS * ex.completed
+    for (const ex of entry.extras ?? []) totalVolume += ex.weight * ex.reps * ex.completed
+  }
+
   return (
     <main className={styles.main}>
+      {totalVolume > 0 && (
+        <div className={styles.totalVolumeCard}>
+          <span className={styles.totalVolumeLabel}>Total Weight Lifted</span>
+          <span className={styles.totalVolumeValue}>
+            {Math.round(totalVolume).toLocaleString()}<span className={styles.weightUnit}>kg</span>
+          </span>
+          {totalVolume >= 1000 && (
+            <span className={styles.totalVolumeSub}>≈ {(totalVolume / 1000).toFixed(1)} tonnes</span>
+          )}
+        </div>
+      )}
       <div className={styles.progressList}>
         {ALL_EXERCISES.map(name => {
           const def = EXERCISES[name]

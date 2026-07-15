@@ -31,6 +31,7 @@ export const DEFAULT_STATE: AppState = {
 }
 
 export const REST_SECONDS = 90
+export const STANDARD_REPS = 5
 export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December']
 export const DAY_HEADERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']

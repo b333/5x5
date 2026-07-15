@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import styles from '../workout.module.css'
 import type { ExerciseName } from '../lib/types'
-import { EXERCISES } from '../lib/constants'
+import { EXERCISES, STANDARD_REPS } from '../lib/constants'
 
 interface Props {
   name: ExerciseName
@@ -81,7 +81,7 @@ export function ExerciseCard({ name, weight, failStreak, setsState, isActive, on
           <span className={styles.setCount}>{doneCount}/{def.sets}</span>
         </div>
       ) : (
-        <div className={styles.setPreview}>{def.sets}×5 reps</div>
+        <div className={styles.setPreview}>{def.sets}×{STANDARD_REPS} reps</div>
       )}
     </div>
   )
