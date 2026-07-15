@@ -55,6 +55,7 @@ Volume is `weight × reps × completed sets`, summed across exercises (reps = `S
 The Calendar day-detail panel for a past session has an **Edit** button that opens a bottom-sheet modal (`HistoryEditModal`) covering most of the viewport. It allows editing:
 - Body weight for that day
 - Exercise and extra weight, completed set count, and total set count
+- Adding an exercise retroactively via a "+ Add Exercise" button, reusing `ExercisePicker` (saved exercises or a new one). The added exercise is appended to that day's Extras, defaulting to all sets completed, and can be removed with the × button before saving. Creating a new exercise here also saves it to the shared exercise library.
 - Save / ✕ Cancel (or tap the backdrop to cancel)
 
 ### Data management

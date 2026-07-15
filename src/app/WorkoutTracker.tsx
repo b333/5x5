@@ -147,6 +147,17 @@ export default function WorkoutTracker() {
     update({ ...state, customExercises: (state.customExercises ?? []).filter(d => d.id !== id) })
   }
 
+  function saveCustomExerciseDef(name: string, sets: number, reps: number, weight: number): CustomExerciseDef {
+    const id = `custom-${state.nextCustomId ?? 1}`
+    const def: CustomExerciseDef = { id, name, sets, reps, defaultWeight: weight }
+    update({
+      ...state,
+      nextCustomId: (state.nextCustomId ?? 1) + 1,
+      customExercises: [...(state.customExercises ?? []), def],
+    })
+    return def
+  }
+
   function logBodyWeight(kg: number) {
     const dateKey = new Date().toISOString().slice(0, 10)
     const existing = (state.bodyWeights ?? []).filter(e => e.date !== dateKey)
@@ -350,7 +361,10 @@ export default function WorkoutTracker() {
         <CalendarView
           history={state.history}
           bodyWeights={state.bodyWeights ?? []}
+          customExercises={state.customExercises ?? []}
           onSaveHistory={saveHistoryEdit}
+          onCreateCustomExercise={saveCustomExerciseDef}
+          onDeleteCustomExercise={deleteCustomExercise}
         />
       )}
 

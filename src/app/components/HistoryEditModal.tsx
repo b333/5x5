@@ -2,25 +2,48 @@
 
 import { useState } from 'react'
 import styles from '../workout.module.css'
-import type { HistoryEntry } from '../lib/types'
+import type { HistoryEntry, CustomExerciseDef } from '../lib/types'
 import { EXERCISES } from '../lib/constants'
 import { formatDate } from '../lib/utils'
+import { ExercisePicker } from './ExercisePicker'
 
 interface Props {
   entry: HistoryEntry
   bodyWeightKg: number | null
+  customExercises: CustomExerciseDef[]
   onSave: (exercises: HistoryEntry['exercises'], extras: HistoryEntry['extras'], newBWKg: number | null) => void
   onClose: () => void
+  onCreateCustomExercise: (name: string, sets: number, reps: number, weight: number) => CustomExerciseDef
+  onDeleteCustomExercise: (id: string) => void
 }
 
-export function HistoryEditModal({ entry, bodyWeightKg, onSave, onClose }: Props) {
+export function HistoryEditModal({ entry, bodyWeightKg, customExercises, onSave, onClose, onCreateCustomExercise, onDeleteCustomExercise }: Props) {
   const [exercises, setExercises] = useState(() => entry.exercises.map(ex => ({ ...ex })))
   const [extras, setExtras] = useState(() => (entry.extras ?? []).map(ex => ({ ...ex })))
   const [bodyWeight, setBodyWeight] = useState(bodyWeightKg != null ? String(bodyWeightKg) : '')
+  const [showPicker, setShowPicker] = useState(false)
 
   function handleSave() {
     const bwParsed = parseFloat(bodyWeight)
     onSave(exercises, extras.length ? extras : undefined, !isNaN(bwParsed) && bwParsed > 0 ? bwParsed : null)
+  }
+
+  function addExtraEntry(name: string, weight: number, sets: number, reps: number) {
+    setExtras(prev => [...prev, { name, weight, completed: sets, total: sets, reps }])
+    setShowPicker(false)
+  }
+
+  function handleAddSaved(def: CustomExerciseDef) {
+    addExtraEntry(def.name, def.defaultWeight, def.sets, def.reps)
+  }
+
+  function handleCreateExtra(name: string, sets: number, reps: number, weight: number) {
+    onCreateCustomExercise(name, sets, reps, weight)
+    addExtraEntry(name, weight, sets, reps)
+  }
+
+  function removeExtra(idx: number) {
+    setExtras(prev => prev.filter((_, i) => i !== idx))
   }
 
   return (
@@ -142,11 +165,30 @@ export function HistoryEditModal({ entry, bodyWeightKg, onSave, onClose }: Props
                       }}
                       className={styles.historyEditTotalInput}
                     />
+                    <button
+                      className={styles.extraRemoveBtn}
+                      onClick={() => removeExtra(exIdx)}
+                      aria-label={`Remove ${ex.name}`}
+                    >×</button>
                   </div>
                 ))}
               </>
             )}
           </div>
+
+          {showPicker ? (
+            <ExercisePicker
+              customExercises={customExercises}
+              onAdd={handleAddSaved}
+              onCreate={handleCreateExtra}
+              onDelete={onDeleteCustomExercise}
+              onClose={() => setShowPicker(false)}
+            />
+          ) : (
+            <button className={styles.addExerciseBtn} onClick={() => setShowPicker(true)}>
+              + Add Exercise
+            </button>
+          )}
         </div>
 
         <div className={styles.modalFooter}>

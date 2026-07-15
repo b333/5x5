@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import styles from '../workout.module.css'
-import type { HistoryEntry, BodyWeightEntry } from '../lib/types'
+import type { HistoryEntry, BodyWeightEntry, CustomExerciseDef } from '../lib/types'
 import { EXERCISES, MONTHS, DAY_HEADERS, STANDARD_REPS } from '../lib/constants'
 import { formatDate, formatDuration, toDateKey, cellKey } from '../lib/utils'
 import { HistoryEditModal } from './HistoryEditModal'
@@ -10,10 +10,13 @@ import { HistoryEditModal } from './HistoryEditModal'
 interface Props {
   history: HistoryEntry[]
   bodyWeights: BodyWeightEntry[]
+  customExercises: CustomExerciseDef[]
   onSaveHistory: (historyIdx: number, exercises: HistoryEntry['exercises'], extras: HistoryEntry['extras'], newBWKg: number | null) => void
+  onCreateCustomExercise: (name: string, sets: number, reps: number, weight: number) => CustomExerciseDef
+  onDeleteCustomExercise: (id: string) => void
 }
 
-export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
+export function CalendarView({ history, bodyWeights, customExercises, onSaveHistory, onCreateCustomExercise, onDeleteCustomExercise }: Props) {
   const now = new Date()
   const [calYear, setCalYear] = useState(now.getFullYear())
   const [calMonth, setCalMonth] = useState(now.getMonth())
@@ -165,8 +168,11 @@ export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
         <HistoryEditModal
           entry={editingEntry}
           bodyWeightKg={bodyWeights.find(e => e.date === toDateKey(editingEntry.date))?.kg ?? null}
+          customExercises={customExercises}
           onSave={saveEdit}
           onClose={() => setEditingHistoryIdx(null)}
+          onCreateCustomExercise={onCreateCustomExercise}
+          onDeleteCustomExercise={onDeleteCustomExercise}
         />
       )}
     </main>
