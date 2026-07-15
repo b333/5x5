@@ -8,13 +8,14 @@ import { formatDate, formatDuration, toDateKey, cellKey } from '../lib/utils'
 
 interface HistoryDraft {
   exercises: HistoryEntry['exercises']
+  extras: NonNullable<HistoryEntry['extras']>
   bodyWeight: string
 }
 
 interface Props {
   history: HistoryEntry[]
   bodyWeights: BodyWeightEntry[]
-  onSaveHistory: (historyIdx: number, exercises: HistoryEntry['exercises'], newBWKg: number | null) => void
+  onSaveHistory: (historyIdx: number, exercises: HistoryEntry['exercises'], extras: HistoryEntry['extras'], newBWKg: number | null) => void
 }
 
 export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
@@ -54,6 +55,7 @@ export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
     setEditingHistoryIdx(idx)
     setHistoryDraft({
       exercises: entry.exercises.map(ex => ({ ...ex })),
+      extras: (entry.extras ?? []).map(ex => ({ ...ex })),
       bodyWeight: bwEntry ? String(bwEntry.kg) : '',
     })
   }
@@ -64,6 +66,7 @@ export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
     onSaveHistory(
       editingHistoryIdx,
       historyDraft.exercises,
+      historyDraft.extras.length ? historyDraft.extras : undefined,
       !isNaN(bwParsed) && bwParsed > 0 ? bwParsed : null,
     )
     setEditingHistoryIdx(null)
@@ -218,6 +221,43 @@ export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
                 </div>
               )
             })}
+            {draft && draft.extras.length > 0 && (
+              <>
+                <div className={styles.extrasLabel}>Extras</div>
+                {draft.extras.map((ex, exIdx) => (
+                  <div key={exIdx} className={styles.historyRow}>
+                    <span className={styles.historyExName}>{ex.name}</span>
+                    <input
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      value={ex.weight}
+                      onChange={e => {
+                        const newExtras = [...draft.extras]
+                        newExtras[exIdx] = { ...newExtras[exIdx], weight: parseFloat(e.target.value) || 0 }
+                        setHistoryDraft({ ...draft, extras: newExtras })
+                      }}
+                      className={styles.historyEditWeightInput}
+                    />
+                    <span className={styles.historyEditWeightUnit}>kg</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max={ex.total}
+                      value={ex.completed}
+                      onChange={e => {
+                        const val = Math.min(ex.total, Math.max(0, parseInt(e.target.value) || 0))
+                        const newExtras = [...draft.extras]
+                        newExtras[exIdx] = { ...newExtras[exIdx], completed: val }
+                        setHistoryDraft({ ...draft, extras: newExtras })
+                      }}
+                      className={styles.historyEditSetsInput}
+                    />
+                    <span className={styles.historyEditTotal}>/{ex.total}</span>
+                  </div>
+                ))}
+              </>
+            )}
             {!draft && selectedEntry.extras && selectedEntry.extras.length > 0 && (
               <>
                 <div className={styles.extrasLabel}>Extras</div>

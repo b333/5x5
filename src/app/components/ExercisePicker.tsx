@@ -19,6 +19,29 @@ export function ExercisePicker({ customExercises, onAdd, onCreate, onDelete, onC
   const [reps, setReps] = useState('10')
   const [weight, setWeight] = useState('20')
 
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [draftSets, setDraftSets] = useState('')
+  const [draftReps, setDraftReps] = useState('')
+  const [draftWeight, setDraftWeight] = useState('')
+
+  function toggleExpand(def: CustomExerciseDef) {
+    if (expandedId === def.id) { setExpandedId(null); return }
+    setExpandedId(def.id)
+    setDraftSets(String(def.sets))
+    setDraftReps(String(def.reps))
+    setDraftWeight(String(def.defaultWeight))
+  }
+
+  function handleAddExpanded(def: CustomExerciseDef) {
+    onAdd({
+      ...def,
+      sets: Math.max(1, parseInt(draftSets) || def.sets),
+      reps: Math.max(1, parseInt(draftReps) || def.reps),
+      defaultWeight: parseFloat(draftWeight) || def.defaultWeight,
+    })
+    setExpandedId(null)
+  }
+
   function handleCreate() {
     const trimmed = name.trim()
     if (!trimmed) return
@@ -54,12 +77,36 @@ export function ExercisePicker({ customExercises, onAdd, onCreate, onDelete, onC
           />
           {filtered.length === 0 && <div className={styles.pickerNoResults}>No matches</div>}
           {filtered.map(def => (
-            <div key={def.id} className={styles.pickerSavedRow}>
-              <button className={styles.pickerSavedAdd} onClick={() => onAdd(def)}>
-                <span className={styles.pickerSavedName}>{def.name}</span>
-                <span className={styles.pickerSavedMeta}>{def.sets}×{def.reps} · {def.defaultWeight}kg</span>
-              </button>
-              <button className={styles.pickerSavedDelete} onClick={() => handleDelete(def.id)}>×</button>
+            <div key={def.id} className={styles.pickerSavedItem}>
+              <div className={styles.pickerSavedRow}>
+                <button className={styles.pickerSavedAdd} onClick={() => onAdd(def)}>
+                  <span className={styles.pickerSavedName}>{def.name}</span>
+                  <span className={styles.pickerSavedMeta}>{def.sets}×{def.reps} · {def.defaultWeight}kg</span>
+                </button>
+                <button className={styles.pickerSavedEdit} onClick={() => toggleExpand(def)} aria-label={`Edit ${def.name} before adding`}>
+                  {expandedId === def.id ? '︿' : '✎'}
+                </button>
+                <button className={styles.pickerSavedDelete} onClick={() => handleDelete(def.id)}>×</button>
+              </div>
+              {expandedId === def.id && (
+                <div className={styles.pickerExpand}>
+                  <div className={styles.pickerRow}>
+                    <label className={styles.pickerLabel}>
+                      Sets
+                      <input className={styles.pickerNumInput} type="number" min="1" max="10" value={draftSets} onChange={e => setDraftSets(e.target.value)} />
+                    </label>
+                    <label className={styles.pickerLabel}>
+                      Reps
+                      <input className={styles.pickerNumInput} type="number" min="1" max="50" value={draftReps} onChange={e => setDraftReps(e.target.value)} />
+                    </label>
+                    <label className={styles.pickerLabel}>
+                      Weight
+                      <input className={styles.pickerNumInput} type="number" min="0" step="0.5" value={draftWeight} onChange={e => setDraftWeight(e.target.value)} />
+                    </label>
+                  </div>
+                  <button className={styles.pickerExpandAddBtn} onClick={() => handleAddExpanded(def)}>Add</button>
+                </div>
+              )}
             </div>
           ))}
         </div>

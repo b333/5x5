@@ -197,10 +197,10 @@ export default function WorkoutTracker() {
     setTimer(null)
   }
 
-  function saveHistoryEdit(historyIdx: number, exercises: HistoryEntry['exercises'], newBWKg: number | null) {
+  function saveHistoryEdit(historyIdx: number, exercises: HistoryEntry['exercises'], extras: HistoryEntry['extras'], newBWKg: number | null) {
     const entry = state.history[historyIdx]
     const dateKey = toDateKey(entry.date)
-    const newHistory = state.history.map((e, i) => i === historyIdx ? { ...e, exercises } : e)
+    const newHistory = state.history.map((e, i) => i === historyIdx ? { ...e, exercises, extras } : e)
     let newBodyWeights = (state.bodyWeights ?? []).filter(e => e.date !== dateKey)
     if (newBWKg !== null) newBodyWeights = [...newBodyWeights, { date: dateKey, kg: newBWKg }]
     update({ ...state, history: newHistory, bodyWeights: newBodyWeights })
