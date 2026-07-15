@@ -207,7 +207,19 @@ export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
                       }}
                       className={styles.historyEditSetsInput}
                     />
-                    <span className={styles.historyEditTotal}>/{ex.total}</span>
+                    <span className={styles.historyEditTotal}>/</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={ex.total}
+                      onChange={e => {
+                        const newTotal = Math.max(1, parseInt(e.target.value) || 1)
+                        const newEx = [...draft.exercises]
+                        newEx[exIdx] = { ...newEx[exIdx], total: newTotal, completed: Math.min(newEx[exIdx].completed, newTotal) }
+                        setHistoryDraft({ ...draft, exercises: newEx })
+                      }}
+                      className={styles.historyEditTotalInput}
+                    />
                   </div>
                 )
               }
@@ -253,7 +265,19 @@ export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
                       }}
                       className={styles.historyEditSetsInput}
                     />
-                    <span className={styles.historyEditTotal}>/{ex.total}</span>
+                    <span className={styles.historyEditTotal}>/</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={ex.total}
+                      onChange={e => {
+                        const newTotal = Math.max(1, parseInt(e.target.value) || 1)
+                        const newExtras = [...draft.extras]
+                        newExtras[exIdx] = { ...newExtras[exIdx], total: newTotal, completed: Math.min(newExtras[exIdx].completed, newTotal) }
+                        setHistoryDraft({ ...draft, extras: newExtras })
+                      }}
+                      className={styles.historyEditTotalInput}
+                    />
                   </div>
                 ))}
               </>

@@ -715,12 +715,28 @@
   color: var(--text-muted);
 }
 
+.historyEditTotalInput {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  width: 28px;
+  text-align: center;
+  outline: none;
+  padding: 0 0 2px;
+  -moz-appearance: textfield;
+}
+
 .historyEditBWInput::-webkit-outer-spin-button,
 .historyEditBWInput::-webkit-inner-spin-button,
 .historyEditWeightInput::-webkit-outer-spin-button,
 .historyEditWeightInput::-webkit-inner-spin-button,
 .historyEditSetsInput::-webkit-outer-spin-button,
-.historyEditSetsInput::-webkit-inner-spin-button {
+.historyEditSetsInput::-webkit-inner-spin-button,
+.historyEditTotalInput::-webkit-outer-spin-button,
+.historyEditTotalInput::-webkit-inner-spin-button {
   -webkit-appearance: none;
 }
 
