@@ -5,12 +5,7 @@ import styles from '../workout.module.css'
 import type { HistoryEntry, BodyWeightEntry } from '../lib/types'
 import { EXERCISES, MONTHS, DAY_HEADERS } from '../lib/constants'
 import { formatDate, formatDuration, toDateKey, cellKey } from '../lib/utils'
-
-interface HistoryDraft {
-  exercises: HistoryEntry['exercises']
-  extras: NonNullable<HistoryEntry['extras']>
-  bodyWeight: string
-}
+import { HistoryEditModal } from './HistoryEditModal'
 
 interface Props {
   history: HistoryEntry[]
@@ -24,7 +19,6 @@ export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
   const [calMonth, setCalMonth] = useState(now.getMonth())
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [editingHistoryIdx, setEditingHistoryIdx] = useState<number | null>(null)
-  const [historyDraft, setHistoryDraft] = useState<HistoryDraft | null>(null)
 
   const todayKey = cellKey(now.getFullYear(), now.getMonth(), now.getDate())
 
@@ -48,34 +42,10 @@ export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
     else setCalMonth(m => m + 1)
   }
 
-  function startEdit(idx: number) {
-    const entry = history[idx]
-    const dateKey = toDateKey(entry.date)
-    const bwEntry = bodyWeights.find(e => e.date === dateKey)
-    setEditingHistoryIdx(idx)
-    setHistoryDraft({
-      exercises: entry.exercises.map(ex => ({ ...ex })),
-      extras: (entry.extras ?? []).map(ex => ({ ...ex })),
-      bodyWeight: bwEntry ? String(bwEntry.kg) : '',
-    })
-  }
-
-  function saveEdit() {
-    if (editingHistoryIdx === null || !historyDraft) return
-    const bwParsed = parseFloat(historyDraft.bodyWeight)
-    onSaveHistory(
-      editingHistoryIdx,
-      historyDraft.exercises,
-      historyDraft.extras.length ? historyDraft.extras : undefined,
-      !isNaN(bwParsed) && bwParsed > 0 ? bwParsed : null,
-    )
+  function saveEdit(exercises: HistoryEntry['exercises'], extras: HistoryEntry['extras'], newBWKg: number | null) {
+    if (editingHistoryIdx === null) return
+    onSaveHistory(editingHistoryIdx, exercises, extras, newBWKg)
     setEditingHistoryIdx(null)
-    setHistoryDraft(null)
-  }
-
-  function cancelEdit() {
-    setEditingHistoryIdx(null)
-    setHistoryDraft(null)
   }
 
   const firstDow = new Date(calYear, calMonth, 1).getDay()
@@ -88,8 +58,7 @@ export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
 
   const selectedEntry = selectedDate ? workoutMap[selectedDate] : null
   const selectedIdx = selectedDate !== null ? (workoutIndexMap[selectedDate] ?? -1) : -1
-  const isEditing = selectedIdx >= 0 && editingHistoryIdx === selectedIdx
-  const draft = isEditing ? historyDraft : null
+  const editingEntry = editingHistoryIdx !== null ? history[editingHistoryIdx] : null
 
   return (
     <main className={styles.main}>
@@ -139,90 +108,21 @@ export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
             </span>
             <span className={styles.dateLabel}>{formatDate(selectedEntry.date)}</span>
             <div className={styles.historyActions}>
-              {selectedEntry.duration != null && !isEditing && (
+              {selectedEntry.duration != null && (
                 <span className={styles.historyDuration}>{formatDuration(selectedEntry.duration)}</span>
               )}
-              {bodyWeights.find(e => e.date === selectedDate) && !isEditing && (
+              {bodyWeights.find(e => e.date === selectedDate) && (
                 <span className={styles.historyBW}>
                   {bodyWeights.find(e => e.date === selectedDate)!.kg}kg
                 </span>
               )}
-              {isEditing ? (
-                <>
-                  <button className={styles.historySaveBtn} onClick={saveEdit}>Save</button>
-                  <button className={styles.historyCancelBtn} onClick={cancelEdit}>✕</button>
-                </>
-              ) : (
-                <button className={styles.historyEditBtn} onClick={() => startEdit(selectedIdx)}>Edit</button>
-              )}
+              <button className={styles.historyEditBtn} onClick={() => setEditingHistoryIdx(selectedIdx)}>Edit</button>
             </div>
           </div>
 
-          {isEditing && draft && (
-            <div className={styles.historyEditBWRow}>
-              <span>Body weight</span>
-              <input
-                type="number"
-                step="0.1"
-                min="0"
-                placeholder="—"
-                value={draft.bodyWeight}
-                onChange={e => setHistoryDraft({ ...draft, bodyWeight: e.target.value })}
-                className={styles.historyEditBWInput}
-              />
-              <span className={styles.bwUnit}>kg</span>
-            </div>
-          )}
-
           <div className={styles.historyExercises}>
-            {(draft ? draft.exercises : selectedEntry.exercises).map((ex, exIdx) => {
+            {selectedEntry.exercises.map(ex => {
               const success = ex.completed === ex.total
-              if (draft) {
-                return (
-                  <div key={ex.name} className={styles.historyRow}>
-                    <span className={styles.historyExName}>{EXERCISES[ex.name].label}</span>
-                    <input
-                      type="number"
-                      step="0.5"
-                      min="0"
-                      value={ex.weight}
-                      onChange={e => {
-                        const newEx = [...draft.exercises]
-                        newEx[exIdx] = { ...newEx[exIdx], weight: parseFloat(e.target.value) || 0 }
-                        setHistoryDraft({ ...draft, exercises: newEx })
-                      }}
-                      className={styles.historyEditWeightInput}
-                    />
-                    <span className={styles.historyEditWeightUnit}>kg</span>
-                    <input
-                      type="number"
-                      min="0"
-                      max={ex.total}
-                      value={ex.completed}
-                      onChange={e => {
-                        const val = Math.min(ex.total, Math.max(0, parseInt(e.target.value) || 0))
-                        const newEx = [...draft.exercises]
-                        newEx[exIdx] = { ...newEx[exIdx], completed: val }
-                        setHistoryDraft({ ...draft, exercises: newEx })
-                      }}
-                      className={styles.historyEditSetsInput}
-                    />
-                    <span className={styles.historyEditTotal}>/</span>
-                    <input
-                      type="number"
-                      min="1"
-                      value={ex.total}
-                      onChange={e => {
-                        const newTotal = Math.max(1, parseInt(e.target.value) || 1)
-                        const newEx = [...draft.exercises]
-                        newEx[exIdx] = { ...newEx[exIdx], total: newTotal, completed: Math.min(newEx[exIdx].completed, newTotal) }
-                        setHistoryDraft({ ...draft, exercises: newEx })
-                      }}
-                      className={styles.historyEditTotalInput}
-                    />
-                  </div>
-                )
-              }
               return (
                 <div key={ex.name} className={styles.historyRow}>
                   <span className={styles.historyExName}>{EXERCISES[ex.name].label}</span>
@@ -233,56 +133,7 @@ export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
                 </div>
               )
             })}
-            {draft && draft.extras.length > 0 && (
-              <>
-                <div className={styles.extrasLabel}>Extras</div>
-                {draft.extras.map((ex, exIdx) => (
-                  <div key={exIdx} className={styles.historyRow}>
-                    <span className={styles.historyExName}>{ex.name}</span>
-                    <input
-                      type="number"
-                      step="0.5"
-                      min="0"
-                      value={ex.weight}
-                      onChange={e => {
-                        const newExtras = [...draft.extras]
-                        newExtras[exIdx] = { ...newExtras[exIdx], weight: parseFloat(e.target.value) || 0 }
-                        setHistoryDraft({ ...draft, extras: newExtras })
-                      }}
-                      className={styles.historyEditWeightInput}
-                    />
-                    <span className={styles.historyEditWeightUnit}>kg</span>
-                    <input
-                      type="number"
-                      min="0"
-                      max={ex.total}
-                      value={ex.completed}
-                      onChange={e => {
-                        const val = Math.min(ex.total, Math.max(0, parseInt(e.target.value) || 0))
-                        const newExtras = [...draft.extras]
-                        newExtras[exIdx] = { ...newExtras[exIdx], completed: val }
-                        setHistoryDraft({ ...draft, extras: newExtras })
-                      }}
-                      className={styles.historyEditSetsInput}
-                    />
-                    <span className={styles.historyEditTotal}>/</span>
-                    <input
-                      type="number"
-                      min="1"
-                      value={ex.total}
-                      onChange={e => {
-                        const newTotal = Math.max(1, parseInt(e.target.value) || 1)
-                        const newExtras = [...draft.extras]
-                        newExtras[exIdx] = { ...newExtras[exIdx], total: newTotal, completed: Math.min(newExtras[exIdx].completed, newTotal) }
-                        setHistoryDraft({ ...draft, extras: newExtras })
-                      }}
-                      className={styles.historyEditTotalInput}
-                    />
-                  </div>
-                ))}
-              </>
-            )}
-            {!draft && selectedEntry.extras && selectedEntry.extras.length > 0 && (
+            {selectedEntry.extras && selectedEntry.extras.length > 0 && (
               <>
                 <div className={styles.extrasLabel}>Extras</div>
                 {selectedEntry.extras.map((ex, i) => (
@@ -299,6 +150,15 @@ export function CalendarView({ history, bodyWeights, onSaveHistory }: Props) {
             )}
           </div>
         </div>
+      )}
+
+      {editingEntry && (
+        <HistoryEditModal
+          entry={editingEntry}
+          bodyWeightKg={bodyWeights.find(e => e.date === toDateKey(editingEntry.date))?.kg ?? null}
+          onSave={saveEdit}
+          onClose={() => setEditingHistoryIdx(null)}
+        />
       )}
     </main>
   )

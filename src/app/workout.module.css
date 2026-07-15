@@ -623,20 +623,6 @@
   border-color: var(--text-faint);
 }
 
-.historySaveBtn {
-  background: var(--accent);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 6px;
-  transition: background 0.15s;
-}
-
-.historySaveBtn:hover {
-  background: #ea6c10;
-}
-
 .historyCancelBtn {
   background: transparent;
   color: var(--text-faint);
@@ -1196,4 +1182,63 @@
   color: var(--text-faint);
   text-align: center;
   padding: 8px 0;
+}
+
+/* History edit modal */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modalPanel {
+  width: 100%;
+  max-width: 480px;
+  max-height: 92vh;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.modalHeader .dateLabel {
+  display: block;
+  margin-top: 4px;
+}
+
+.modalBody {
+  padding: 18px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modalFooter {
+  display: flex;
+  gap: 10px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.modalFooter .primaryBtn,
+.modalFooter .ghostBtn {
+  width: auto;
+  flex: 1;
+  padding: 16px;
 }
