@@ -342,7 +342,7 @@ export default function WorkoutTracker() {
             <div className={styles.actionRow}>
               <button
                 className={`${styles.primaryBtn} ${!allDone ? styles.btnDisabled : ''}`}
-                onClick={completeWorkout}
+                onClick={() => { if (confirm('Complete workout?')) completeWorkout() }}
                 disabled={!allDone}
               >Complete Workout</button>
               <button className={styles.ghostBtn} onClick={finishEarly}>Finish Early</button>
