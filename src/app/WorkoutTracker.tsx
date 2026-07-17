@@ -208,6 +208,11 @@ export default function WorkoutTracker() {
     setTimer(null)
   }
 
+  function finishEarly() {
+    if (!confirm('Finish workout now? Sets you haven\'t checked off will be logged as incomplete.')) return
+    completeWorkout()
+  }
+
   function saveHistoryEdit(historyIdx: number, exercises: HistoryEntry['exercises'], extras: HistoryEntry['extras'], newBWKg: number | null) {
     const entry = state.history[historyIdx]
     const dateKey = toDateKey(entry.date)
@@ -340,7 +345,7 @@ export default function WorkoutTracker() {
                 onClick={completeWorkout}
                 disabled={!allDone}
               >Complete Workout</button>
-              <button className={styles.ghostBtn} onClick={completeWorkout}>Finish Early</button>
+              <button className={styles.ghostBtn} onClick={finishEarly}>Finish Early</button>
             </div>
           )}
 
