@@ -99,7 +99,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 18px;
+  padding: 10px;
   transition: border-color 0.2s;
 }
 
@@ -174,7 +174,7 @@
 .setRow {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 7px;
   flex-wrap: wrap;
 }
 
@@ -742,6 +742,7 @@
 /* Extra exercise cards */
 .extraCard {
   margin-top: 0;
+  margin-bottom: 10px;
 }
 
 .extraRight {
@@ -775,7 +776,7 @@
   font-weight: 500;
   border: 1px dashed var(--border);
   transition: border-color 0.15s, color 0.15s;
-  margin-bottom: 16px;
+  margin: 15px 0;
 }
 
 .addExerciseBtn:hover {
