@@ -75,6 +75,7 @@ export function ExercisePicker({ customExercises, onAdd, onCreate, onDelete, onC
             placeholder="Filter saved exercises…"
             value={filter}
             onChange={e => setFilter(e.target.value)}
+            autoFocus
           />
           {filtered.length === 0 && <div className={styles.pickerNoResults}>No matches</div>}
           {filtered.map(def => (
@@ -120,7 +121,7 @@ export function ExercisePicker({ customExercises, onAdd, onCreate, onDelete, onC
           value={name}
           onChange={e => setName(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && name.trim()) handleCreate() }}
-          autoFocus
+          autoFocus={customExercises.length === 0}
         />
         <div className={styles.pickerRow}>
           <label className={styles.pickerLabel}>
