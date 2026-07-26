@@ -337,7 +337,7 @@ export default function WorkoutTracker() {
             const dow = new Date().getDay()
             if (dow === 0 || dow === 6) return <div className={styles.restDay}>Rest day — recover and come back strong.</div>
             if (dow === 2 || dow === 4) return <button className={styles.primaryBtn} onClick={startFreeSession}>Start Free Session</button>
-            return <button className={styles.primaryBtn} onClick={startWorkout}>Start Workout {state.nextWorkout}</button>
+            return <button className={styles.primaryBtn} onClick={() => { if (confirm(`Start Workout ${state.nextWorkout}?`)) startWorkout() }}>Start Workout {state.nextWorkout}</button>
           })() : (
             <div className={styles.actionRow}>
               <button
