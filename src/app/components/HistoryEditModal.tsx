@@ -165,6 +165,20 @@ export function HistoryEditModal({ entry, bodyWeightKg, customExercises, onSave,
                       }}
                       className={styles.historyEditTotalInput}
                     />
+                    <span className={styles.historyEditTotal}>×</span>
+                    <input
+                      type="number"
+                      min="1"
+                      value={ex.reps}
+                      onChange={e => {
+                        const newReps = Math.max(1, parseInt(e.target.value) || 1)
+                        const newExtras = [...extras]
+                        newExtras[exIdx] = { ...newExtras[exIdx], reps: newReps }
+                        setExtras(newExtras)
+                      }}
+                      className={styles.historyEditRepsInput}
+                      aria-label={`${ex.name} reps`}
+                    />
                     <button
                       className={styles.extraRemoveBtn}
                       onClick={() => removeExtra(exIdx)}
