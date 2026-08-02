@@ -10,7 +10,7 @@ A mobile-first Next.js app for tracking the Stronglifts 5×5 barbell programme. 
 - **Workout A**: Squat 5×5, Bench Press 5×5, Barbell Row 5×5
 - **Workout B**: Squat 5×5, Overhead Press 5×5, Deadlift 1×5
 
-Workouts follow a weekly schedule: Monday/Wednesday/Friday run the next A/B workout, Tuesday/Thursday offer a **Free Session** (workout `'C'` — pick any exercises via the exercise picker, no fixed exercise list), and weekends show a rest-day message with no session available.
+Workouts follow a weekly schedule: Monday/Wednesday/Friday run the next A/B workout; every other day (Tuesday, Thursday, and weekends) offers a **Free Session** (workout `'C'` — pick any exercises via the exercise picker, no fixed exercise list).
 
 The app tracks which workout is next, the current working weight for each exercise, and a full session history.
 
