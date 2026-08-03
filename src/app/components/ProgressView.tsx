@@ -1,7 +1,7 @@
 'use client'
 
 import styles from '../workout.module.css'
-import type { HistoryEntry, ExerciseName } from '../lib/types'
+import type { HistoryEntry, ExerciseName, BodyWeightEntry } from '../lib/types'
 import { EXERCISES, STANDARD_REPS } from '../lib/constants'
 
 const ALL_EXERCISES: ExerciseName[] = ['squat', 'benchPress', 'barbellRow', 'overheadPress', 'deadlift']
@@ -14,14 +14,20 @@ interface Session {
 interface Props {
   history: HistoryEntry[]
   weights: Record<ExerciseName, number>
+  bodyWeights: BodyWeightEntry[]
 }
 
-export function ProgressView({ history, weights }: Props) {
+export function ProgressView({ history, weights, bodyWeights }: Props) {
   let totalVolume = 0
   for (const entry of history) {
     for (const ex of entry.exercises) totalVolume += ex.weight * STANDARD_REPS * ex.completed
     for (const ex of entry.extras ?? []) if (ex.weight !== 'bw') totalVolume += ex.weight * ex.reps * ex.completed
   }
+
+  const sortedBW = [...bodyWeights].sort((a, b) => a.date.localeCompare(b.date))
+  const bwSessions: Session[] = sortedBW.map(e => ({ weight: e.kg, success: true }))
+  const currentBW = sortedBW.length ? sortedBW[sortedBW.length - 1].kg : null
+  const bwChange = sortedBW.length > 1 ? currentBW! - sortedBW[0].kg : null
 
   return (
     <main className={styles.main}>
@@ -34,6 +40,29 @@ export function ProgressView({ history, weights }: Props) {
           {totalVolume >= 1000 && (
             <span className={styles.totalVolumeSub}>≈ {(totalVolume / 1000).toFixed(1)} tonnes</span>
           )}
+        </div>
+      )}
+      {currentBW !== null && (
+        <div className={styles.progressCard} style={{ marginBottom: 16 }}>
+          <div className={styles.progressHeader}>
+            <span className={styles.progressExName}>Body Weight</span>
+            <span className={styles.progressCurrentWeight}>
+              {currentBW}<span className={styles.weightUnit}>kg</span>
+            </span>
+          </div>
+          <div className={styles.progressStats}>
+            <div className={styles.progressStat}>
+              <span className={styles.progressStatValue}>{bwSessions.length}</span>
+              <span className={styles.progressStatLabel}>entries</span>
+            </div>
+            <div className={styles.progressStat}>
+              <span className={styles.progressStatValue}
+                style={{ color: bwChange !== null && bwChange !== 0 ? (bwChange > 0 ? 'var(--success)' : 'var(--danger)') : undefined }}
+              >{bwChange !== null ? `${bwChange > 0 ? '+' : ''}${bwChange.toFixed(1)}kg` : '—'}</span>
+              <span className={styles.progressStatLabel}>change</span>
+            </div>
+          </div>
+          {bwSessions.length > 1 && <Sparkline sessions={bwSessions} />}
         </div>
       )}
       <div className={styles.progressList}>

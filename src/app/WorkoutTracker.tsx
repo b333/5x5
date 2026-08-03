@@ -359,7 +359,7 @@ export default function WorkoutTracker() {
       )}
 
       {view === 'progress' && (
-        <ProgressView history={state.history} weights={state.weights} />
+        <ProgressView history={state.history} weights={state.weights} bodyWeights={state.bodyWeights ?? []} />
       )}
 
       {view === 'calendar' && (
