@@ -268,6 +268,7 @@ export default function WorkoutTracker() {
   const todayIsMonday = new Date().getDay() === 1
   const todayKey = new Date().toISOString().slice(0, 10)
   const todayBW = (state.bodyWeights ?? []).find(e => e.date === todayKey)
+  const alreadyWorkedOutToday = state.history.some(h => toDateKey(h.date) === todayKey)
 
   return (
     <div className={styles.container}>
@@ -284,7 +285,9 @@ export default function WorkoutTracker() {
         <main className={styles.main}>
           <div className={styles.workoutHeader}>
             <span className={styles.badge}>
-              {session?.workout === 'C' ? 'Free Session' : `Workout ${session ? session.workout : state.nextWorkout}`}
+              {session
+                ? (session.workout === 'C' ? 'Free Session' : `Workout ${session.workout}`)
+                : (alreadyWorkedOutToday ? 'Free Session' : `Workout ${state.nextWorkout}`)}
             </span>
             {session && <span className={styles.dateLabel}>{formatDate(session.startedAt)}</span>}
             {session && <span className={styles.workoutTimer}>{formatElapsed(workoutElapsed)}</span>}
@@ -336,7 +339,7 @@ export default function WorkoutTracker() {
           {!session ? (() => {
             const dow = new Date().getDay()
             const isScheduledABDay = dow === 1 || dow === 3 || dow === 5
-            if (!isScheduledABDay) return <button className={styles.primaryBtn} onClick={startFreeSession}>Start Free Session</button>
+            if (!isScheduledABDay || alreadyWorkedOutToday) return <button className={styles.primaryBtn} onClick={startFreeSession}>Start Free Session</button>
             return <button className={styles.primaryBtn} onClick={() => { if (confirm(`Start Workout ${state.nextWorkout}?`)) startWorkout() }}>Start Workout {state.nextWorkout}</button>
           })() : (
             <div className={styles.actionRow}>
