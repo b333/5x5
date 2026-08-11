@@ -213,6 +213,13 @@ export default function WorkoutTracker() {
     completeWorkout()
   }
 
+  function cancelSession() {
+    if (!confirm('Cancel this session? Nothing will be logged.')) return
+    update({ ...state, session: null })
+    setShowExercisePicker(false)
+    setTimer(null)
+  }
+
   function saveHistoryEdit(historyIdx: number, exercises: HistoryEntry['exercises'], extras: HistoryEntry['extras'], newBWKg: number | null) {
     const entry = state.history[historyIdx]
     const dateKey = toDateKey(entry.date)
@@ -349,6 +356,7 @@ export default function WorkoutTracker() {
                 disabled={!allDone}
               >Complete Workout</button>
               <button className={styles.ghostBtn} onClick={finishEarly}>Finish Early</button>
+              <button className={styles.ghostBtn} onClick={cancelSession}>Cancel</button>
             </div>
           )}
 
