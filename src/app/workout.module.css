@@ -514,6 +514,21 @@
   line-height: 1.4;
 }
 
+.calDots {
+  display: flex;
+  gap: 3px;
+}
+
+.calDotCardio {
+  font-size: 10px;
+  font-weight: 700;
+  background: #06b6d4;
+  color: #fff;
+  border-radius: 3px;
+  padding: 1px 4px;
+  line-height: 1.4;
+}
+
 .calDetail {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -1137,6 +1152,59 @@
 
 .bwCancel:hover {
   color: var(--text-muted);
+}
+
+/* Cardio card */
+.cardioCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+
+.cardioLogged {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cardioValue {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+
+.cardioEntry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cardioInput {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--accent);
+  width: 52px;
+  text-align: right;
+  outline: none;
+  padding: 0 0 2px;
+  -moz-appearance: textfield;
+}
+
+.cardioInput::-webkit-outer-spin-button,
+.cardioInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
 }
 
 /* Progress view */

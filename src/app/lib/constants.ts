@@ -26,6 +26,7 @@ export const DEFAULT_STATE: AppState = {
   session: null,
   history: [],
   bodyWeights: [],
+  cardioSessions: [],
   customExercises: [],
   nextCustomId: 1,
 }

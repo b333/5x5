@@ -9,6 +9,7 @@ import { todayISO, toDateKey, formatDate, formatElapsed, beep } from './lib/util
 import { ExerciseCard } from './components/ExerciseCard'
 import { ExtraCard } from './components/ExtraCard'
 import { BodyWeightCard } from './components/BodyWeightCard'
+import { CardioCard } from './components/CardioCard'
 import { ExercisePicker } from './components/ExercisePicker'
 import { RestTimer } from './components/RestTimer'
 import { CalendarView } from './components/CalendarView'
@@ -164,6 +165,17 @@ export default function WorkoutTracker() {
     update({ ...state, bodyWeights: [...existing, { date: dateKey, kg }] })
   }
 
+  function logCardio(duration: number, distanceKm: number | undefined) {
+    const dateKey = new Date().toISOString().slice(0, 10)
+    const existing = (state.cardioSessions ?? []).filter(e => e.date !== dateKey)
+    update({ ...state, cardioSessions: [...existing, { date: dateKey, duration, distanceKm }] })
+  }
+
+  function saveCardioEdit(dateKey: string, duration: number, distanceKm: number | undefined) {
+    const existing = (state.cardioSessions ?? []).filter(e => e.date !== dateKey)
+    update({ ...state, cardioSessions: [...existing, { date: dateKey, duration, distanceKm }] })
+  }
+
   function completeWorkout() {
     if (!state.session) return
     const { session } = state
@@ -275,6 +287,7 @@ export default function WorkoutTracker() {
   const todayIsMonday = new Date().getDay() === 1
   const todayKey = new Date().toISOString().slice(0, 10)
   const todayBW = (state.bodyWeights ?? []).find(e => e.date === todayKey)
+  const todayCardio = (state.cardioSessions ?? []).find(e => e.date === todayKey)
   const alreadyWorkedOutToday = state.history.some(h => toDateKey(h.date) === todayKey)
 
   return (
@@ -301,6 +314,8 @@ export default function WorkoutTracker() {
           </div>
 
           {todayIsMonday && <BodyWeightCard todayBW={todayBW} onLog={logBodyWeight} />}
+
+          <CardioCard todayCardio={todayCardio} onLog={logCardio} />
 
           <div className={styles.exerciseList}>
             {activeExercises.map(ex => (
@@ -370,15 +385,17 @@ export default function WorkoutTracker() {
       )}
 
       {view === 'progress' && (
-        <ProgressView history={state.history} weights={state.weights} bodyWeights={state.bodyWeights ?? []} />
+        <ProgressView history={state.history} weights={state.weights} bodyWeights={state.bodyWeights ?? []} cardioSessions={state.cardioSessions ?? []} />
       )}
 
       {view === 'calendar' && (
         <CalendarView
           history={state.history}
           bodyWeights={state.bodyWeights ?? []}
+          cardioSessions={state.cardioSessions ?? []}
           customExercises={state.customExercises ?? []}
           onSaveHistory={saveHistoryEdit}
+          onSaveCardio={saveCardioEdit}
           onCreateCustomExercise={saveCustomExerciseDef}
           onDeleteCustomExercise={deleteCustomExercise}
         />

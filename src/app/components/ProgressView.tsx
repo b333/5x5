@@ -1,8 +1,9 @@
 'use client'
 
 import styles from '../workout.module.css'
-import type { HistoryEntry, ExerciseName, BodyWeightEntry } from '../lib/types'
+import type { HistoryEntry, ExerciseName, BodyWeightEntry, CardioEntry } from '../lib/types'
 import { EXERCISES, STANDARD_REPS } from '../lib/constants'
+import { formatDuration } from '../lib/utils'
 
 const ALL_EXERCISES: ExerciseName[] = ['squat', 'benchPress', 'barbellRow', 'overheadPress', 'deadlift']
 
@@ -15,9 +16,10 @@ interface Props {
   history: HistoryEntry[]
   weights: Record<ExerciseName, number>
   bodyWeights: BodyWeightEntry[]
+  cardioSessions: CardioEntry[]
 }
 
-export function ProgressView({ history, weights, bodyWeights }: Props) {
+export function ProgressView({ history, weights, bodyWeights, cardioSessions }: Props) {
   let totalVolume = 0
   for (const entry of history) {
     for (const ex of entry.exercises) totalVolume += ex.weight * STANDARD_REPS * ex.completed
@@ -28,6 +30,11 @@ export function ProgressView({ history, weights, bodyWeights }: Props) {
   const bwSessions: Session[] = sortedBW.map(e => ({ weight: e.kg, success: true }))
   const currentBW = sortedBW.length ? sortedBW[sortedBW.length - 1].kg : null
   const bwChange = sortedBW.length > 1 ? currentBW! - sortedBW[0].kg : null
+
+  const sortedCardio = [...cardioSessions].sort((a, b) => a.date.localeCompare(b.date))
+  const cardioDurationSessions: Session[] = sortedCardio.map(e => ({ weight: e.duration, success: true }))
+  const totalCardioMinutes = sortedCardio.reduce((sum, e) => sum + e.duration, 0)
+  const totalCardioDistance = sortedCardio.reduce((sum, e) => sum + (e.distanceKm ?? 0), 0)
 
   return (
     <main className={styles.main}>
@@ -63,6 +70,27 @@ export function ProgressView({ history, weights, bodyWeights }: Props) {
             </div>
           </div>
           {bwSessions.length > 1 && <Sparkline sessions={bwSessions} />}
+        </div>
+      )}
+      {sortedCardio.length > 0 && (
+        <div className={styles.progressCard} style={{ marginBottom: 16 }}>
+          <div className={styles.progressHeader}>
+            <span className={styles.progressExName}>Cardio</span>
+            <span className={styles.progressCurrentWeight}>
+              {formatDuration(totalCardioMinutes * 60)}
+            </span>
+          </div>
+          <div className={styles.progressStats}>
+            <div className={styles.progressStat}>
+              <span className={styles.progressStatValue}>{sortedCardio.length}</span>
+              <span className={styles.progressStatLabel}>sessions</span>
+            </div>
+            <div className={styles.progressStat}>
+              <span className={styles.progressStatValue}>{totalCardioDistance > 0 ? `${totalCardioDistance.toFixed(1)}km` : '—'}</span>
+              <span className={styles.progressStatLabel}>distance</span>
+            </div>
+          </div>
+          {cardioDurationSessions.length > 1 && <Sparkline sessions={cardioDurationSessions} />}
         </div>
       )}
       <div className={styles.progressList}>

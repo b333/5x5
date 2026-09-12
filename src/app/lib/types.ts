@@ -46,6 +46,12 @@ export interface BodyWeightEntry {
   kg: number
 }
 
+export interface CardioEntry {
+  date: string              // YYYY-MM-DD
+  duration: number          // minutes
+  distanceKm?: number
+}
+
 export interface AppState {
   weights: Record<ExerciseName, number>
   nextWorkout: WorkoutLabel
@@ -53,6 +59,7 @@ export interface AppState {
   session: Session | null
   history: HistoryEntry[]
   bodyWeights: BodyWeightEntry[]
+  cardioSessions: CardioEntry[]
   customExercises: CustomExerciseDef[]
   nextCustomId: number
 }
