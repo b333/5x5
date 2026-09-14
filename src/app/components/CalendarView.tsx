@@ -138,7 +138,7 @@ export function CalendarView({ history, bodyWeights, cardioSessions, customExerc
                       {entry.workout === 'C' ? 'F' : entry.workout}
                     </span>
                   )}
-                  {cardio && <span className={styles.calDotCardio}>R</span>}
+                  {cardio && <span className={styles.calDotCardio}>C</span>}
                 </span>
               )}
             </button>
