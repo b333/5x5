@@ -436,6 +436,20 @@
   margin-bottom: 20px;
 }
 
+.calMonthCardio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -8px 0 20px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.calMonthCardio > span:last-child {
+  color: var(--text);
+  font-weight: 600;
+}
+
 .calDayHeader {
   text-align: center;
   font-size: 13px;

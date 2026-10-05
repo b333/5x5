@@ -91,6 +91,11 @@ export function CalendarView({ history, bodyWeights, cardioSessions, customExerc
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ]
 
+  const monthPrefix = cellKey(calYear, calMonth, 1).slice(0, 8)
+  const monthCardioKm = cardioSessions
+    .filter(e => e.date.startsWith(monthPrefix))
+    .reduce((sum, e) => sum + (e.distanceKm ?? 0), 0)
+
   const selectedEntry = selectedDate ? workoutMap[selectedDate] : null
   const selectedCardio = selectedDate ? cardioMap[selectedDate] : null
   const selectedTotalLift = selectedEntry
@@ -144,6 +149,11 @@ export function CalendarView({ history, bodyWeights, cardioSessions, customExerc
             </button>
           )
         })}
+      </div>
+
+      <div className={styles.calMonthCardio}>
+        <span className={styles.calDotCardio}>C</span>
+        Cardio this month: <span>{Math.round(monthCardioKm * 10) / 10} km</span>
       </div>
 
       {selectedDate && (selectedEntry || selectedCardio) && (
